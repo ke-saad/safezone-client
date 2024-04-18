@@ -1,0 +1,63 @@
+.home-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: #378CE7;
+    font-family: Monaco, monospace;
+
+    
+    
+  }
+  
+  .background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../Images/world_map.jpg'); /* Updated path to the background image */
+    background-size: cover;
+    background-position: center;
+    opacity: 0.4; /* Adjust opacity as needed */
+    z-index: -1; /* Ensure the background image is behind other content */
+  }
+  
+  .navbar {
+    background-color: #378CE7;
+    padding: 10px 0;
+
+  }
+  
+  .nav-link {
+    color: white;
+    margin-right: 10px;
+    text-decoration: wavy underline;
+    display: inline-block;
+    text-align: center;
+    width: 30%;
+    vertical-align: middle;
+    transition: all 0.3s ease;
+
+  }
+  .welcome-title {
+    font-size: 36px; /* Adjust font size as needed */
+    margin-top: 20%; /* Adjust margin to center vertically */
+    margin-top: 10%; /* Adjust margin to position higher */
+    font-family: Monaco, monospace;
+    font-weight: bolder;
+  }
+  
+  .marquee {
+    font-size: 24px; /* Adjust font size as needed */
+    margin-top: 10px; /* Adjust margin to position higher */
+    font-family: Monaco, monospace; /* Apply Monaco font */
+  }
+  .nav-link:hover {
+    color: #dff5ff; /* Change font color on hover */
+    transform: scale(1.2); /* Increase size on hover */
+  }

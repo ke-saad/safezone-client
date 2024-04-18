@@ -1,0 +1,88 @@
+/* Signup.css */
+.signup-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: #378CE7;
+    font-family: Monaco, monospace;
+  }
+  .error-message {
+    color: #E72929;
+    margin-bottom: 10px; /* Add margin to separate from form */
+  }
+  
+  .signup-title {
+    font-size: 36px;
+    margin-top: 20%;
+    margin-top: 10%;
+    font-family: Monaco, monospace;
+    font-weight: bolder;
+    color: #378CE7;
+  }
+  
+  .signup-input {
+    margin: 10px auto;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 300px;
+    font-size: 16px;
+    display: block; /* Make inputs block-level to stack vertically */
+  }
+  
+  .signup-button {
+    margin: 10px auto;
+    padding: 10px 20px;
+    background-color: #378CE7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    display: block; /* Make button block-level to align with inputs */
+  }
+  
+  .navbar {
+    background-color: #378CE7;
+    padding: 10px 0;
+  }
+  
+  .nav-link {
+    color: white;
+    margin-right: 10px;
+    text-decoration: wavy underline;
+    display: inline-block;
+    text-align: center;
+    width: 30%;
+    vertical-align: middle;
+    transition: all 0.3s ease;
+  }
+  
+  .background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../Images/world_map.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.4;
+    z-index: -1;
+  }
+  
+  .signup-input:focus {
+    outline: none;
+    border-width: 3px;
+    border-color: #378CE7;
+  }
+  
+  .signup-input::placeholder {
+    color: rgba(55, 140, 231, 0.4);
+  }
+  
