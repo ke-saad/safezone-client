@@ -1,33 +1,104 @@
+/* Reset the margin and padding for all elements to ensure consistency */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Border and padding are included in the element's dimensions */
+}
+
+/* Full-height layout */
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+/* Navbar Styles */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0; /* Ensure the navbar goes all the way to the right */
   background-color: #378CE7;
-  padding: 10px 0;
-  z-index: 999; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px; /* Add some horizontal padding */
+  z-index: 1000; /* High z-index to ensure it's on top */
 }
 
 .nav-link {
   color: white;
-  margin-right: 10px;
   text-decoration: none;
-  display: inline-block;
-  text-align: center;
+  padding: 10px;
 }
 
-.map-title {
-  font-size: 36px;
-  margin-top: 60px; 
-  font-weight: bold;
-  text-align: center;
-}
-
-.pigeon-map {
-  position: fixed;
-  top: 0;
+/* Main container for the sidebar and map */
+.map-container {
+  display: grid;
+  flex-direction: row;
+  position: absolute;
+  top: 43px; /* Height of the navbar */
+  bottom: 0;
   left: 0;
-  width: 100%;
+  right: 0;
+  overflow: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 200px;
+  background-color: #f4f4f4;
+  padding: 20px;
   height: 100%;
-  overflow: hidden; 
+  overflow-y: auto; /* Scroll bar if needed */
+}
+
+/* Adjust the map to fill the remaining width */
+.pigeon-map {
+  flex-grow: 1;
+  height: 100%;
+}
+
+/* Remove the World Map title as requested */
+.map-title {
+  display: none;
+}
+
+/* Message box styles */
+.message {
+  color: #333;
+  font-size: 14px;
+}
+
+/* Control buttons styles */
+.control-buttons {
+  position: absolute;
+  bottom: initial; /* Remove bottom positioning */
+  left: 10px; /* Add left positioning */
+  top: 10px; /* Add top positioning below the zoom control */
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  justify-content: space-between; /* Add spacing between buttons */
+  width: auto; /* Remove fixed width */
+  height: fit-content; /* Allow buttons to adjust to their content */
+  z-index: 1000;
+}
+
+.control-button {
+  background-color: #378CE7; /* Match navbar color */
+  border: none;
+  padding: 5px; /* Reduce button padding for smaller size */
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+  margin-bottom: 5px; /* Add space between icons */
+}
+
+.control-button:hover {
+  background-color: #f8f8f8;
+}
+
+.control-button img {
+  width: 22px; /* Reduce icon size */
+  height: 22px;
 }
