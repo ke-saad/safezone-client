@@ -1,18 +1,17 @@
-// MapPage.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer ,useMapEvents, Marker, Popup, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, useMapEvents, Marker, Popup, ZoomControl, GeoJSON } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
-import calculateItinerary from './itineraryService'; // Import the itinerary calculation function
+import calculateItinerary from './itineraryService'; // This function should be defined in your project
 import * as turf from '@turf/turf';
-import { GeoJSON } from 'react-leaflet';
 
 // Import marker icon images
 import blueMarker from '../Images/blue_marker.png';
 import greenMarker from '../Images/green_marker.png';
 import redMarker from '../Images/red_marker.png';
+
 // Import icon images
 import startItineraryIcon from '../Images/new_itinerary_icon.png';
 import addSafeIcon from '../Images/safe_location_icon.png';
@@ -20,90 +19,90 @@ import addDangerousIcon from '../Images/danger_location_icon.png';
 import calculateItineraryIcon from '../Images/calculate_itinerary_icon.png';
 
 const MapPage = () => {
-  const [markers, setMarkers] = useState([]);
+  const [safeMarkers, setSafeMarkers] = useState([]);
+  const [dangerousMarkers, setDangerousMarkers] = useState([]);
+  const [itineraryMarkers, setItineraryMarkers] = useState([]);
   const [message, setMessage] = useState('');
   const [activeAction, setActiveAction] = useState(null);
-  const [itineraryResponse, setItineraryResponse] = useState(null);
-  const [itineraryMarkers, setItineraryMarkers] = useState([]);
-  const [geoJsonLayer, setGeoJsonLayer] = useState(null);
+  const [safeGeoJsonLayers, setSafeGeoJsonLayers] = useState([]);
+  const [dangerousGeoJsonLayers, setDangerousGeoJsonLayers] = useState([]);
+  const [dangerousDescriptions, setDangerousDescriptions] = useState({});
+  const [deleteButtonClicked, setDeleteButtonClicked] = useState(false); // State to track delete button click
 
-  const MapEvents = () => {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        const newMarker = { position: [lat, lng], color: activeAction === 'addSafe' ? 'green' : (activeAction === 'addDangerous' ? 'red' : 'blue') };
-    
-        // Check if the clicked position is already occupied by any marker
-        if (!markers.some(marker => marker.position[0] === lat && marker.position[1] === lng)) {
-          if (activeAction === 'startItinerary') {
-            // Count only blue markers
-            const blueMarkersCount = markers.filter(marker => marker.color === 'blue').length;
-    
-            // Add blue marker only if there are fewer than two blue markers
-            if (blueMarkersCount < 2) {
-              setMarkers(prev => [...prev, newMarker]);
-            }
-          } else if (activeAction === 'addSafe' || activeAction === 'addDangerous') {
-            // Add red or green markers for 'addSafe' or 'addDangerous' actions
-            setMarkers(prev => {
-              const updatedMarkers = [...prev, newMarker];
-              const colorMarkers = updatedMarkers.filter(m => m.color === activeAction.slice(3).toLowerCase());
-              updateGeoJsonLayer(colorMarkers);
-              return updatedMarkers;
-            });
-          }
-        }
-      }
-    });
-    
-    return null;
-  };
-
-  const updateGeoJsonLayer = (colorMarkers) => {
-    if (colorMarkers.length >= 10) {
-      const points = colorMarkers.map(marker => turf.point([marker.position[1], marker.position[0]]));
-      console.log('Points Array:', points);
-      const hull = turf.convex(turf.featureCollection(points));
-      if (hull) {
-        hull.properties = { fillColor: colorMarkers[0].color }; 
-        setGeoJsonLayer(hull);
-      } else {
-        setGeoJsonLayer(null);
-      }
-    } else {
-      setGeoJsonLayer(null);
+  const updateGeoJsonLayer = (markers, setLayerFunc) => {
+    if (markers.length % 10 === 0) {
+      const points = markers.slice(-10).map(marker => turf.point([marker.position[1], marker.position[0]]));
+      const featureCollection = turf.featureCollection(points);
+      const hull = turf.convex(featureCollection);
+      setLayerFunc(layers => [...layers, hull]);
     }
   };
-  
-  
+
+  const handleMarkerDelete = (index, type) => {
+    setDeleteButtonClicked(true); // Set delete button clicked
+    if (type === 'safe') {
+      setSafeMarkers((prevMarkers) => {
+        const updatedMarkers = prevMarkers.filter((_, i) => i !== index);
+        updateGeoJsonLayer(updatedMarkers, setSafeGeoJsonLayers); // Update layers after deletion
+        return updatedMarkers;
+      });
+    } else if (type === 'dangerous') {
+      setDangerousMarkers((prevMarkers) => {
+        const updatedMarkers = prevMarkers.filter((_, i) => i !== index);
+        updateGeoJsonLayer(updatedMarkers, setDangerousGeoJsonLayers); // Update layers after deletion
+        return updatedMarkers;
+      });
+    } else if (type === 'itinerary') {
+      setItineraryMarkers(prevMarkers => prevMarkers.filter((_, i) => i !== index));
+    }
+  };
 
   const calculateAndSetItinerary = async () => {
-    if (markers.length === 2) {
-      const itineraryData = await calculateItinerary(markers[0].position, markers[1].position);
-      if (itineraryData) {
-        console.log('Itinerary Data:', itineraryData);
-        setItineraryResponse(itineraryData);
-        setItineraryMarkers([]);
-        setItineraryMarkers([itineraryData.routes[0].legs[0].start_point, itineraryData.routes[0].legs[0].end_point]);
-        setMessage('Itinerary calculated successfully!');
-      } else {
-        console.error('Failed to calculate itinerary');
-        setMessage('Failed to calculate itinerary');
-      }
+    if (itineraryMarkers.length === 2) {
+      const [start, end] = itineraryMarkers;
+      const itinerary = await calculateItinerary(start.position, end.position);
+      // Process and display the itinerary
     } else {
       setMessage('Please select start and end points first.');
     }
   };
 
-  const handleActionClick = (action) => {
-    setActiveAction(action);
-    setMessage('');
-  };
+  const MapEvents = () => {
+    useMapEvents({
+      click(e) {
+        if (!deleteButtonClicked) { // Check if delete button is not clicked
+          if (activeAction === 'addSafe' || activeAction === 'addDangerous') {
+            const { lat, lng } = e.latlng;
+            const newMarker = { position: [lat, lng] };
+            const markerList = activeAction === 'addSafe' ? safeMarkers : dangerousMarkers;
+            const setMarkers = activeAction === 'addSafe' ? setSafeMarkers : setDangerousMarkers;
+            const updateLayerFunc = activeAction === 'addSafe' ? updateGeoJsonLayer : updateGeoJsonLayer;
 
-  const handleMarkerDelete = (index) => {
-    const updatedMarkers = [...markers];
-    updatedMarkers.splice(index, 1);
-    setMarkers(updatedMarkers);
+            if (!markerList.some(marker => marker.position[0] === lat && marker.position[1] === lng)) {
+              let description = '';
+              if (activeAction === 'addDangerous') {
+                description = prompt('Enter description for the dangerous location:');
+                if (description === null || description.trim() === '') {
+                  return; // Stop if no description is provided
+                }
+                setDangerousDescriptions({ ...dangerousDescriptions, [`${lat},${lng}`]: description });
+              }
+              
+              const updatedMarkerList = [...markerList, newMarker];
+              setMarkers(updatedMarkerList);
+              updateLayerFunc(updatedMarkerList, activeAction === 'addSafe' ? setSafeGeoJsonLayers : setDangerousGeoJsonLayers);
+            }
+          } else if (activeAction === 'startItinerary') {
+            if (itineraryMarkers.length < 2) {
+              const { lat, lng } = e.latlng;
+              setItineraryMarkers(prev => [...prev, { position: [lat, lng] }]);
+            }
+          }
+        }
+        setDeleteButtonClicked(false); // Reset delete button clicked state
+      }
+    });
+    return null;
   };
 
   // Define custom icons using the imported images
@@ -143,39 +142,70 @@ const MapPage = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             detectRetina={true}
           />
-
-      {markers.map((marker, index) => (
-        <Marker key={index} position={marker.position} icon={marker.color === 'blue' ? blueIcon : (marker.color === 'green' ? greenIcon : redIcon)}>
-          <Popup>
-            {marker.color} location <br/>
-            <button onClick={(e) => {
-              e.stopPropagation();  // This stops the click event from propagating to the map
-              handleMarkerDelete(index);
-            }}>Delete</button>
-          </Popup>
-        </Marker>
-      ))}
-
-
-          {itineraryMarkers.map((marker, index) => (
-            <Marker key={index} position={marker} icon={blueIcon}>
-              <Popup>Itinerary marker</Popup>
+          <MapEvents />
+          {safeMarkers.map((marker, index) => (
+            <Marker
+              key={`safe-${index}`}
+              position={marker.position}
+              icon={greenIcon}
+            >
+              <Popup onClose={() => setDeleteButtonClicked(false)} onOpen={() => setDeleteButtonClicked(false)}>
+                Safe location <br />
+                ({marker.position[1]}, {marker.position[0]}) <br />
+                <button onClick={() => handleMarkerDelete(index, 'safe')}>Delete</button>
+              </Popup>
             </Marker>
           ))}
-
-{geoJsonLayer && (
-          <GeoJSON
-            data={geoJsonLayer}
-            style={() => ({
-              color: geoJsonLayer.properties.fillColor,
-              weight: 2,
-              opacity: 0.65,
-              fillOpacity: 0.7
-            })}
-          />
-        )}
-
-          <MapEvents />
+          {dangerousMarkers.map((marker, index) => (
+            <Marker
+              key={`dangerous-${index}`}
+              position={marker.position}
+              icon={redIcon}
+            >
+              <Popup onClose={() => setDeleteButtonClicked(false)} onOpen={() => setDeleteButtonClicked(false)}>
+                Danger: {dangerousDescriptions[`${marker.position[0]},${marker.position[1]}`] || 'No description provided'} <br />
+                ({marker.position[1]}, {marker.position[0]}) <br />
+                <button onClick={() => handleMarkerDelete(index, 'dangerous')}>Delete</button>
+              </Popup>
+            </Marker>
+          ))}
+          {itineraryMarkers.map((marker, index) => (
+            <Marker
+              key={`itinerary-${index}`}
+              position={marker.position}
+              icon={blueIcon}
+            >
+              <Popup onClose={() => setDeleteButtonClicked(false)} onOpen={() => setDeleteButtonClicked(false)}>
+                Itinerary point <br />
+                ({marker.position[1]}, {marker.position[0]}) <br />
+                <button onClick={() => handleMarkerDelete(index, 'itinerary')}>Delete</button>
+              </Popup>
+            </Marker>
+          ))}
+          {safeGeoJsonLayers.map((layer, index) => (
+            <GeoJSON
+              key={`safe-layer-${index}`}
+              data={layer}
+              style={{
+                color: '#00FF00',
+                weight: 2,
+                opacity: 0.35,
+                fillOpacity: 0.5
+              }}
+            />
+          ))}
+          {dangerousGeoJsonLayers.map((layer, index) => (
+            <GeoJSON
+              key={`dangerous-layer-${index}`}
+              data={layer}
+              style={{
+                color: '#FF0000',
+                weight: 2,
+                opacity: 0.35,
+                fillOpacity: 0.5
+              }}
+            />
+          ))}
         </MapContainer>
         {message && (
           <div className="message" style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', padding: '10px', backgroundColor: '#f8f8f8', border: '1px solid #ccc', borderRadius: '5px' }}>
@@ -183,16 +213,16 @@ const MapPage = () => {
           </div>
         )}
         <div className="control-buttons">
-          <button className="control-button" onClick={() => handleActionClick('startItinerary')} title="Start New Itinerary">
+          <button className="control-button" data-action="startItinerary" onClick={() => setActiveAction('startItinerary')} title="Start New Itinerary">
             <img src={startItineraryIcon} alt="Start Itinerary" />
           </button>
-          <button className="control-button" onClick={() => handleActionClick('addSafe')} title="Add Safe Location">
+          <button className="control-button" data-action="addSafe" onClick={() => setActiveAction('addSafe')} title="Add Safe Location">
             <img src={addSafeIcon} alt="Add Safe Location" />
           </button>
-          <button className="control-button" onClick={() => handleActionClick('addDangerous')} title="Add Dangerous Location">
+          <button className="control-button" data-action="addDangerous" onClick={() => setActiveAction('addDangerous')} title="Add Dangerous Location">
             <img src={addDangerousIcon} alt="Add Dangerous Location" />
           </button>
-          <button className="control-button" onClick={calculateAndSetItinerary} title="Calculate Itinerary">
+          <button className="control-button" data-action="calculateItinerary" onClick={calculateAndSetItinerary} title="Calculate Itinerary">
             <img src={calculateItineraryIcon} alt="Calculate Itinerary" />
           </button>
         </div>
