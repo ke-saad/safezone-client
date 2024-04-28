@@ -18,6 +18,19 @@ import addSafeIcon from '../Images/safe_location_icon.png';
 import addDangerousIcon from '../Images/danger_location_icon.png';
 import calculateItineraryIcon from '../Images/calculate_itinerary_icon.png';
 
+const PopupContent = ({ title, description, position, onDelete }) => (
+  <div>
+    <h3>{title}</h3>
+    {title === "Danger" ? (
+      <p>{`Danger: ${description}`}</p>
+    ) : (
+      <p>{description}</p>
+    )}
+    <p>({position[1]}, {position[0]})</p>
+    <button onClick={onDelete}>Delete</button>
+  </div>
+);
+
 const MapPage = () => {
   const [safeMarkers, setSafeMarkers] = useState([]);
   const [dangerousMarkers, setDangerousMarkers] = useState([]);
@@ -80,7 +93,9 @@ const MapPage = () => {
 
             if (!markerList.some(marker => marker.position[0] === lat && marker.position[1] === lng)) {
               let description = '';
+              let title = '';
               if (activeAction === 'addDangerous') {
+                title = "Danger";
                 description = prompt('Enter description for the dangerous location:');
                 if (description === null || description.trim() === '') {
                   return; // Stop if no description is provided
@@ -150,9 +165,13 @@ const MapPage = () => {
               icon={greenIcon}
             >
               <Popup onClose={() => setDeleteButtonClicked(false)} onOpen={() => setDeleteButtonClicked(false)}>
-                Safe location <br />
-                ({marker.position[1]}, {marker.position[0]}) <br />
-                <button onClick={() => handleMarkerDelete(index, 'safe')}>Delete</button>
+                <PopupContent
+                  title="Safe location"
+                  description=""
+                  backgroundColor="#E1F7F5"
+                  position={marker.position}
+                  onDelete={() => handleMarkerDelete(index, 'safe')}
+                />
               </Popup>
             </Marker>
           ))}
@@ -163,9 +182,13 @@ const MapPage = () => {
               icon={redIcon}
             >
               <Popup onClose={() => setDeleteButtonClicked(false)} onOpen={() => setDeleteButtonClicked(false)}>
-                Danger: {dangerousDescriptions[`${marker.position[0]},${marker.position[1]}`] || 'No description provided'} <br />
-                ({marker.position[1]}, {marker.position[0]}) <br />
-                <button onClick={() => handleMarkerDelete(index, 'dangerous')}>Delete</button>
+                <PopupContent
+                  title="Danger"
+                  backgroundColor="#E1F7F5"
+                  description={dangerousDescriptions[`${marker.position[0]},${marker.position[1]}`] || 'No description provided'}
+                  position={marker.position}
+                  onDelete={() => handleMarkerDelete(index, 'dangerous')}
+                />
               </Popup>
             </Marker>
           ))}
@@ -176,9 +199,13 @@ const MapPage = () => {
               icon={blueIcon}
             >
               <Popup onClose={() => setDeleteButtonClicked(false)} onOpen={() => setDeleteButtonClicked(false)}>
-                Itinerary point <br />
-                ({marker.position[1]}, {marker.position[0]}) <br />
-                <button onClick={() => handleMarkerDelete(index, 'itinerary')}>Delete</button>
+                <PopupContent
+                  title="Itinerary point"
+                  backgroundColor="#E1F7F5"
+                  description=""
+                  position={marker.position}
+                  onDelete={() => handleMarkerDelete(index, 'itinerary')}
+                />
               </Popup>
             </Marker>
           ))}
