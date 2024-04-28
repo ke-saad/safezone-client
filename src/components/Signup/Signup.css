@@ -85,4 +85,8 @@
   .signup-input::placeholder {
     color: rgba(55, 140, 231, 0.4);
   }
+  .success-message {
+    color: #4CAF50;
+    margin-bottom: 10px;
+  }
   
