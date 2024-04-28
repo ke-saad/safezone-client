@@ -6,7 +6,8 @@
 }
 
 /* Full-height layout */
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
 }
@@ -17,7 +18,7 @@ html, body {
   top: 0;
   left: 0;
   right: 0; /* Ensure the navbar goes all the way to the right */
-  background-color: #378CE7;
+  background-color: #378ce7;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -84,7 +85,7 @@ html, body {
 }
 
 .control-button {
-  background-color: #378CE7; /* Match navbar color */
+  background-color: #378ce7; /* Match navbar color */
   border: none;
   padding: 5px; /* Reduce button padding for smaller size */
   border-radius: 5px;
@@ -102,4 +103,3 @@ html, body {
   width: 22px; /* Reduce icon size */
   height: 22px;
 }
-
