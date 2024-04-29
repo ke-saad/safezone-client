@@ -24,6 +24,7 @@ body {
   align-items: center;
   padding: 0 20px; /* Add some horizontal padding */
   z-index: 1000; /* High z-index to ensure it's on top */
+  height: 45px;
 }
 
 .nav-link {

@@ -6,6 +6,8 @@ import Aboutus from './components/Aboutus/Aboutus';
 import NotFound from './components/NotFound/NotFound';
 import ForgotPassword from './components/FrogotPassword/ForgotPassword';
 import MapPage from './components/MapPage/MapPage';
+import AdminDashboard from './components/AdminDashboard/AdminDashboard';
+import AccessDenied from './components/AccessDenied/AccessDenied';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route path='*' element={<Navigate to='/not-found' />} />
         <Route path='/not-found' element={<NotFound />} />
+        <Route path='/admindashboard' element={<AdminDashboard />} />
+        <Route path='/accessdenied' element={<AccessDenied />} />
       </Routes>
     </BrowserRouter>
   );

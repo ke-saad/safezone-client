@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import Link and useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 import axios from "axios";
+
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,11 +19,11 @@ const Login = () => {
       });
       const token = response.data.token;
       localStorage.setItem("token", token);
+      console.log("Token stored:", token); // Log the token to verify storage
       setError("");
-      navigate("/AdminDashboard"); // Redirect after successful login
+      navigate("/admindashboard");
     } catch (error) {
       setError("Invalid username or password");
-      // Clear error after 3 seconds
       setTimeout(() => {
         setError("");
       }, 3000);
@@ -45,16 +46,16 @@ const Login = () => {
       <h2 className="login-title">Login</h2>
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit} className="login-form">
-        {" "}
-        {/* Add login-form class */}
         <input
           type="text"
+          id="username"
+          name="username"
           className="login-input"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
-        <br /> {/* Add line break to make form vertical */}
+        <br />
         <input
           type="password"
           className="login-input"
@@ -62,7 +63,7 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <br /> {/* Add line break to make form vertical */}
+        <br />
         <button type="submit" className="login-button">
           Login
         </button>
