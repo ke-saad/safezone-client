@@ -9,6 +9,9 @@ import MapPage from './components/MapPage/MapPage';
 import AdminDashboard from './components/AdminDashboard/AdminDashboard';
 import AccessDenied from './components/AccessDenied/AccessDenied';
 import UsersManagingPage from './components/UsersManaginfPage/UsersManagingPage';
+import ViewAllUsers from './components/ViewAllUsers/ViewAllUsers';
+import UpdateViewAUser from './components/UpdateViewAUser/UpdateViewAUser';
+import UserInformation from './components/UserInformation/UserInformation';
 
 function App() {
   return (
@@ -25,6 +28,9 @@ function App() {
         <Route path='/admindashboard' element={<AdminDashboard />} />
         <Route path='/accessdenied' element={<AccessDenied />} />
         <Route path='/users-managing' element={<UsersManagingPage />} />
+        <Route path='/viewallusers' element={<ViewAllUsers />} />
+        <Route path='/updateviewauser' element={<UpdateViewAUser />} />
+        <Route path='/userinformation/:userId' element={<UserInformation />} />
       </Routes>
     </BrowserRouter>
   );

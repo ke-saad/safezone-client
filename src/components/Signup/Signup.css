@@ -89,3 +89,20 @@
   color: #4caf50;
   margin-bottom: 10px;
 }
+.checkbox-container {
+  margin-top: 10px; /* Add some space above the checkboxes */
+}
+
+.checkbox-container label {
+  display: inline-block;
+  margin-right: 10px; /* Add space between checkbox and label */
+}
+
+.checkbox-container input[type="checkbox"] {
+  margin-right: 5px; /* Add space between checkboxes */
+}
+
+.signup-input,
+.checkbox-container label {
+  vertical-align: top; /* Align checkboxes and labels with the top of the input fields */
+}

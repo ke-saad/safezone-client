@@ -15,13 +15,13 @@ const UsersManagingPage = () => {
       </div>
       <h2>Manage users</h2>
       <div className="action-buttons">
-        <Link to="/admin/users/add" className="action-button">
+        <Link to="/register" className="action-button">
           Add a user
         </Link>
-        <Link to="/admin/users" className="action-button">
+        <Link to="/viewallusers" className="action-button">
           View all users
         </Link>
-        <Link to="/admin/users/get" className="action-button">
+        <Link to="/updateviewauser" className="action-button">
           View / update a user
         </Link>
         <Link to="/admin/users" className="action-button">

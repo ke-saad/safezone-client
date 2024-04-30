@@ -6,6 +6,7 @@ import "./Signup.css";
 const Signup = ({ resetLoginForm }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -22,8 +23,13 @@ const Signup = ({ resetLoginForm }) => {
     setError("");
     setSuccessMessage("");
 
-    if (!username || !password) {
-      setError("Username and password are required");
+    if (!username || !password || !confirmPassword) {
+      setError("Username, password, and confirm password are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
@@ -37,6 +43,7 @@ const Signup = ({ resetLoginForm }) => {
       if (response.status === 201) {
         setUsername("");
         setPassword("");
+        setConfirmPassword("");
         setIsAdmin(false);
         setSuccessMessage(response.data.message);
 
@@ -73,14 +80,14 @@ const Signup = ({ resetLoginForm }) => {
         <Link to="/" className="nav-link">
           Home
         </Link>
-        <Link to="/login" className="nav-link">
-          Login
+        <Link to="/admindashboard" className="nav-link">
+          Dashboard
         </Link>
         <Link to="/aboutus" className="nav-link">
           About Us
         </Link>
       </div>
-      <h2 className="signup-title">Sign Up</h2>
+      <h2 className="signup-title">Add a new user</h2>
       {error && <div className="error-message">{error}</div>}
       {successMessage && (
         <div className="success-message">{successMessage}</div>
@@ -99,6 +106,13 @@ const Signup = ({ resetLoginForm }) => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          type={showPassword ? "text" : "password"}
+          className="signup-input"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
         />
         <div className="checkbox-container">
           <label>
@@ -119,7 +133,7 @@ const Signup = ({ resetLoginForm }) => {
           <label htmlFor="isAdmin">Admin?</label>
         </div>
         <button type="submit" className="signup-button">
-          Sign Up
+          Add user
         </button>
       </form>
       <div className="background-image"></div>
