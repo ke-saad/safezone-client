@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   MapContainer,
@@ -14,6 +14,7 @@ import "leaflet/dist/leaflet.css";
 import "./MapPage.css";
 import calculateItinerary from "./itineraryService"; // This function should be defined in your project
 import * as turf from "@turf/turf";
+
 
 // Import marker icon images
 import blueMarker from "../Images/blue_marker.png";
@@ -185,9 +186,6 @@ const MapPage = () => {
       <div className="navbar" style={{ backgroundColor: "#378CE7" }}>
         <Link to="/" className="nav-link">
           Home
-        </Link>
-        <Link to="/login" className="nav-link">
-          Login
         </Link>
         <Link to="/aboutus" className="nav-link">
           About Us

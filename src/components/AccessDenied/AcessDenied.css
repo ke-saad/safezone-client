@@ -31,18 +31,20 @@
   .navbar {
     background-color: #378CE7;
     padding: 10px 0;
+    display: flex;
+    justify-content: space-between; /* Update to evenly distribute space */
   }
   
   .nav-link {
     color: white;
-    margin-right: 10px;
     text-decoration: wavy underline;
-    display: inline-block;
     text-align: center;
-    width: 30%;
     vertical-align: middle;
     transition: all 0.3s ease;
+    flex: 1; /* Adjusted to allow links to take up equal space */
+    margin: 0 10px; /* Added margin to create space between links */
   }
+  
   
   .background-image {
     position: absolute;

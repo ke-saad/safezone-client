@@ -36,9 +36,6 @@ const Login = () => {
         <Link to="/" className="nav-link">
           Home
         </Link>
-        <Link to="/register" className="nav-link">
-          Sign Up
-        </Link>
         <Link to="/aboutus" className="nav-link">
           About Us
         </Link>

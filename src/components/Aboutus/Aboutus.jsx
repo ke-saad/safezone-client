@@ -9,7 +9,6 @@ function Aboutus() {
       <div className="navbar">
         <Link to="/" className="nav-link">Home</Link>
         <Link to="/login" className="nav-link">Login</Link>
-        <Link to="/register" className="nav-link">Sign Up</Link>
       </div>
       <h2>About Us</h2>
       <p>

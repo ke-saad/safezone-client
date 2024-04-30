@@ -8,6 +8,7 @@ import ForgotPassword from './components/FrogotPassword/ForgotPassword';
 import MapPage from './components/MapPage/MapPage';
 import AdminDashboard from './components/AdminDashboard/AdminDashboard';
 import AccessDenied from './components/AccessDenied/AccessDenied';
+import UsersManagingPage from './components/UsersManaginfPage/UsersManagingPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path='/not-found' element={<NotFound />} />
         <Route path='/admindashboard' element={<AdminDashboard />} />
         <Route path='/accessdenied' element={<AccessDenied />} />
+        <Route path='/users-managing' element={<UsersManagingPage />} />
       </Routes>
     </BrowserRouter>
   );

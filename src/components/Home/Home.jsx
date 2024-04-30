@@ -7,7 +7,6 @@ function Home() {
     <div className="home-container">
       <div className="navbar">
         <Link to="/login" className="nav-link">Login</Link>
-        <Link to="/register" className="nav-link">Sign Up</Link>
         <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
       <h2 className='welcome-title'>Welcome to SafeZone</h2>

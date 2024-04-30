@@ -7,40 +7,41 @@ import securityIcon from "../Images/securityIcon.png";
 import dangerIcon from "../Images/dangerIcon.png";
 import activityIcon from "../Images/activityIcon.png";
 import alertIcon from "../Images/alertIcon.png";
+import mapIcon from "../Images/mapIcon.png";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
     } else {
-      axios.get("http://localhost:3001/user/role", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        const { role } = response.data;
-        if (role === "admin") {
-          setIsAdmin(true);
-        } else {
-          navigate("/accessdenied");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching user role:", error);
-        navigate("/login");
-      });
+      axios
+        .get("http://localhost:3001/user/role", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          const { role } = response.data;
+          if (role === "admin") {
+            setIsAdmin(true);
+          } else {
+            navigate("/accessdenied");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user role:", error);
+          navigate("/login");
+        });
     }
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/");
+    navigate("/login");
   };
 
   const handleManageAccount = () => {
@@ -48,7 +49,7 @@ const AdminDashboard = () => {
   };
 
   const handleManageUsers = () => {
-    navigate("/admin/users");
+    navigate("/users-managing");
   };
 
   const handleManageSecurityZones = () => {
@@ -67,53 +68,52 @@ const AdminDashboard = () => {
     navigate("/admin/alerts");
   };
 
-  const handleRegisterUser = () => {
-    navigate("/register");
+  const handleViewMap = () => {
+    navigate("/map");
   };
 
   return (
     <div className="admin-dashboard-container">
       <div className="navbar">
-        <a href="/" className="nav-link">Home</a>
-        <div className="dropdown">
-          <span className="dropdown-arrow" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-            &#9660;
-          </span>
-          {isDropdownOpen && (
-            <div className="dropdown-content">
-              <span onClick={handleManageAccount}>Manage Account</span>
-              <span onClick={handleLogout}>Logout</span>
-            </div>
-          )}
-        </div>
+        <a href="/aboutus" className="nav-link">
+          About Us
+        </a>
+        <span className="nav-link" onClick={handleManageAccount}>
+          Manage Account
+        </span>
+        <span className="nav-link" onClick={handleLogout}>
+          Logout
+        </span>
       </div>
       {isAdmin && (
         <div className="center-content">
           <h1>Admin Dashboard</h1>
-          <div className="card-container">
-            <div className="card" onClick={handleManageUsers}>
-              <img src={userIcon} alt="Manage Users" />
-              <p>Manage Users</p>
-            </div>
-            <div className="card" onClick={handleManageSecurityZones}>
-              <img src={securityIcon} alt="Manage Security Zones" />
-              <p>Manage Security Zones</p>
-            </div>
-            <div className="card" onClick={handleManageDangerZones}>
-              <img src={dangerIcon} alt="Manage Danger Zones" />
-              <p>Manage Danger Zones</p>
-            </div>
-            <div className="card" onClick={handleManageActivityLogs}>
-              <img src={activityIcon} alt="Manage Activity Logs" />
-              <p>Manage Activity Logs</p>
-            </div>
-            <div className="card" onClick={handleManageAlerts}>
-              <img src={alertIcon} alt="Manage Alerts" />
-              <p>Manage Alerts</p>
-            </div>
-            <div className="card" onClick={handleRegisterUser}>
-              <img src={userIcon} alt="Register User" /> {/* Assuming using userIcon for register */}
-              <p>Register User</p>
+          <div className="background-wrapper">
+            <div className="card-container">
+              <div className="card" onClick={handleManageUsers}>
+                <img src={userIcon} alt="Manage Users" />
+                <p>Users</p>
+              </div>
+              <div className="card" onClick={handleManageSecurityZones}>
+                <img src={securityIcon} alt="Manage Security Zones" />
+                <p>Safe Zones</p>
+              </div>
+              <div className="card" onClick={handleManageDangerZones}>
+                <img src={dangerIcon} alt="Manage Danger Zones" />
+                <p>Danger Zones</p>
+              </div>
+              <div className="card" onClick={handleManageActivityLogs}>
+                <img src={activityIcon} alt="Manage Activity Logs" />
+                <p>Activity Logs</p>
+              </div>
+              <div className="card" onClick={handleManageAlerts}>
+                <img src={alertIcon} alt="Manage Alerts" />
+                <p>Alerts</p>
+              </div>
+              <div className="card" onClick={handleViewMap}>
+                <img src={mapIcon} alt="View Map" />
+                <p>Map</p>
+              </div>
             </div>
           </div>
         </div>
