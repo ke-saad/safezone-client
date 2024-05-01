@@ -12,6 +12,10 @@ import UsersManagingPage from './components/UsersManaginfPage/UsersManagingPage'
 import ViewAllUsers from './components/ViewAllUsers/ViewAllUsers';
 import UpdateViewAUser from './components/UpdateViewAUser/UpdateViewAUser';
 import UserInformation from './components/UserInformation/UserInformation';
+import SafeZoneManagingPage from './components/SafeZoneManagingPage/SafeZoneManagingPage';
+import AddSafeZonePage from './components/AddSafeZonePage/AddSafeZonePage';
+import ViewAllSafeZones from './components/ViewAllSafeZones/ViewAllSafeZones';
+
 
 function App() {
   return (
@@ -31,6 +35,9 @@ function App() {
         <Route path='/viewallusers' element={<ViewAllUsers />} />
         <Route path='/updateviewauser' element={<UpdateViewAUser />} />
         <Route path='/userinformation/:userId' element={<UserInformation />} />
+        <Route path='/safezonesmanagingpage' element={<SafeZoneManagingPage />} />
+        <Route path='/addsafezone' element={<AddSafeZonePage />} />
+        <Route path='/viewallsafezones' element={<ViewAllSafeZones />} />
       </Routes>
     </BrowserRouter>
   );

@@ -18,7 +18,7 @@
 }
 
 .nav-link {
-  color: white;
+  color: #ffffff; /* Change font color to white */
   margin-right: 20px;
   text-decoration: none;
 }
@@ -41,7 +41,7 @@
 .card {
   width: 220px; /* Increased width to accommodate wider icons */
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #F2F1EB;
   border-radius: 10px;
   cursor: pointer;
   display: flex;
@@ -50,7 +50,9 @@
 }
 
 .card:hover {
-  background-color: #e0e0e0;
+  background-color: #E4F1FF;
+  transform: scale(1.1);
+  transition: 0.5s ease;
 }
 
 .card img {
@@ -62,6 +64,7 @@
 .card p {
   white-space: nowrap;
   margin-top: 10px;
+  text-align: center;
 }
 
 .background-image {

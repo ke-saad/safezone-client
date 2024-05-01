@@ -24,10 +24,6 @@ const UsersManagingPage = () => {
         <Link to="/updateviewauser" className="action-button">
           View / update a user
         </Link>
-        <Link to="/admin/users" className="action-button">
-          Delete a user
-        </Link>
-        {/* Add more action buttons for other user management actions */}
       </div>
       <div className="background-image"></div>
     </div>

@@ -30,11 +30,10 @@
   .navbar {
     background-color: #378CE7;
     padding: 10px 0;
+}
 
-  }
-  
-  .nav-link {
-    color: white;
+.nav-link {
+    color: #ffffff; /* Change font color to white */
     margin-right: 10px;
     text-decoration: wavy underline;
     display: inline-block;
@@ -42,8 +41,7 @@
     width: 30%;
     vertical-align: middle;
     transition: all 0.3s ease;
-
-  }
+}
   .welcome-title {
     font-size: 36px; /* Adjust font size as needed */
     margin-top: 20%; /* Adjust margin to center vertically */
@@ -58,6 +56,6 @@
     font-family: Monaco, monospace; /* Apply Monaco font */
   }
   .nav-link:hover {
-    color: #dff5ff; /* Change font color on hover */
+    color: #2C4E80; /* Change font color on hover */
     transform: scale(1.2); /* Increase size on hover */
   }

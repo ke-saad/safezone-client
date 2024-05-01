@@ -53,7 +53,7 @@ const AdminDashboard = () => {
   };
 
   const handleManageSecurityZones = () => {
-    navigate("/admin/securityzones");
+    navigate("/safezonesmanagingpage");
   };
 
   const handleManageDangerZones = () => {
