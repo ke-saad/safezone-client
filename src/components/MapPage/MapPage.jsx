@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
 import {
   MapContainer,
@@ -12,16 +13,13 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapPage.css";
-import calculateItinerary from "./itineraryService"; // This function should be defined in your project
+import calculateItinerary from "./itineraryService";
 import * as turf from "@turf/turf";
 
-
-// Import marker icon images
 import blueMarker from "../Images/blue_marker.png";
 import greenMarker from "../Images/green_marker.png";
 import redMarker from "../Images/red_marker.png";
 
-// Import icon images
 import startItineraryIcon from "../Images/new_itinerary_icon.png";
 import addSafeIcon from "../Images/safe_location_icon.png";
 import addDangerousIcon from "../Images/danger_location_icon.png";
@@ -51,31 +49,65 @@ const MapPage = () => {
   const [safeGeoJsonLayers, setSafeGeoJsonLayers] = useState([]);
   const [dangerousGeoJsonLayers, setDangerousGeoJsonLayers] = useState([]);
   const [dangerousDescriptions, setDangerousDescriptions] = useState({});
-  const [deleteButtonClicked, setDeleteButtonClicked] = useState(false); // State to track delete button click
+  const [deleteButtonClicked, setDeleteButtonClicked] = useState(false);
 
-  const updateGeoJsonLayer = (markers, setLayerFunc) => {
-    if (markers.length % 10 === 0) {
-      const points = markers
-        .slice(-10)
-        .map((marker) => turf.point([marker.position[1], marker.position[0]]));
-      const featureCollection = turf.featureCollection(points);
-      const hull = turf.convex(featureCollection);
-      setLayerFunc((layers) => [...layers, hull]);
+  const updateGeoJsonLayer = async (markers, setLayerFunc, zoneType) => {
+    if (markers.length >= 10) { // Ensure there are at least 10 markers
+        // Extract the last 10 markers
+        const lastTenMarkers = markers.slice(-10);
+        
+        // Calculate the convex hull (if needed)
+        const points = lastTenMarkers.map(marker => turf.point([marker.position[1], marker.position[0]]));
+        const featureCollection = turf.featureCollection(points);
+        const hull = turf.convex(featureCollection);
+        setLayerFunc(layers => [...layers, hull]);
+
+        // Determine endpoint
+        const endpoint = zoneType === "dangerous" ? 
+            "http://localhost:3001/dangerzones/add" : 
+            "http://localhost:3001/safezones/add";
+
+        // Format payload according to the zone type
+        const payload = {
+          markers: lastTenMarkers.map(marker => {
+            if (zoneType === "dangerous") {
+              const key = `${marker.position[1]},${marker.position[0]}`;
+              return {
+                coordinates: [marker.position[1], marker.position[0]], // Assuming your backend expects [lng, lat]
+                description: dangerousDescriptions[key] || marker.description || "No description"
+              };
+            } else {
+              return {
+                coordinates: [marker.position[1], marker.position[0]]
+              };
+            }
+          })
+        };
+        
+
+        // Make the Axios POST request
+        try {
+            const response = await axios.post(endpoint, payload);
+            console.log(`${zoneType} zones added to the database:`, response.data);
+        } catch (error) {
+            console.error(`Error adding ${zoneType} zones to the database:`, error);
+        }
     }
-  };
+};
+
 
   const handleMarkerDelete = (index, type) => {
-    setDeleteButtonClicked(true); // Set delete button clicked
+    setDeleteButtonClicked(true);
     if (type === "safe") {
       setSafeMarkers((prevMarkers) => {
         const updatedMarkers = prevMarkers.filter((_, i) => i !== index);
-        updateGeoJsonLayer(updatedMarkers, setSafeGeoJsonLayers); // Update layers after deletion
+        updateGeoJsonLayer(updatedMarkers, setSafeGeoJsonLayers, "safe");
         return updatedMarkers;
       });
     } else if (type === "dangerous") {
       setDangerousMarkers((prevMarkers) => {
         const updatedMarkers = prevMarkers.filter((_, i) => i !== index);
-        updateGeoJsonLayer(updatedMarkers, setDangerousGeoJsonLayers); // Update layers after deletion
+        updateGeoJsonLayer(updatedMarkers, setDangerousGeoJsonLayers, "dangerous");
         return updatedMarkers;
       });
     } else if (type === "itinerary") {
@@ -99,7 +131,13 @@ const MapPage = () => {
     useMapEvents({
       click(e) {
         if (!deleteButtonClicked) {
-          // Check if delete button is not clicked
+          let zoneType;
+          if (activeAction === "addSafe") {
+            zoneType = "safe";
+          } else if (activeAction === "addDangerous") {
+            zoneType = "dangerous";
+          }
+  
           if (activeAction === "addSafe" || activeAction === "addDangerous") {
             const { lat, lng } = e.latlng;
             const newMarker = { position: [lat, lng] };
@@ -107,59 +145,39 @@ const MapPage = () => {
               activeAction === "addSafe" ? safeMarkers : dangerousMarkers;
             const setMarkers =
               activeAction === "addSafe" ? setSafeMarkers : setDangerousMarkers;
-            const updateLayerFunc =
-              activeAction === "addSafe"
-                ? updateGeoJsonLayer
-                : updateGeoJsonLayer;
-
-            if (
-              !markerList.some(
-                (marker) =>
-                  marker.position[0] === lat && marker.position[1] === lng
-              )
-            ) {
-              let description = "";
-              let title = "";
+  
+            if (!markerList.some(marker => marker.position[0] === lat && marker.position[1] === lng)) {
               if (activeAction === "addDangerous") {
-                title = "Danger";
-                description = prompt(
-                  "Enter description for the dangerous location:"
-                );
+                const description = prompt("Enter description for the dangerous location:");
                 if (description === null || description.trim() === "") {
-                  return; // Stop if no description is provided
+                  return; // Exit if no description is provided or cancelled
                 }
-                setDangerousDescriptions({
-                  ...dangerousDescriptions,
-                  [`${lat},${lng}`]: description,
-                });
+                setDangerousDescriptions(prev => ({
+                  ...prev,
+                  [`${lat},${lng}`]: description
+                }));
+                newMarker.description = description; // Store description directly in the marker if needed immediately
               }
-
+  
               const updatedMarkerList = [...markerList, newMarker];
               setMarkers(updatedMarkerList);
-              updateLayerFunc(
-                updatedMarkerList,
-                activeAction === "addSafe"
-                  ? setSafeGeoJsonLayers
-                  : setDangerousGeoJsonLayers
-              );
+              updateGeoJsonLayer(updatedMarkerList, zoneType === "safe" ? setSafeGeoJsonLayers : setDangerousGeoJsonLayers, zoneType);
             }
           } else if (activeAction === "startItinerary") {
             if (itineraryMarkers.length < 2) {
               const { lat, lng } = e.latlng;
-              setItineraryMarkers((prev) => [
-                ...prev,
-                { position: [lat, lng] },
-              ]);
+              setItineraryMarkers(prev => [...prev, { position: [lat, lng] }]);
             }
           }
         }
-        setDeleteButtonClicked(false); // Reset delete button clicked state
+        setDeleteButtonClicked(false);
       },
     });
     return null;
   };
+  
+  
 
-  // Define custom icons using the imported images
   const blueIcon = new L.Icon({
     iconUrl: blueMarker,
     iconSize: [25, 25],
