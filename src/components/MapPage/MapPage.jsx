@@ -52,7 +52,7 @@ const MapPage = () => {
   const [deleteButtonClicked, setDeleteButtonClicked] = useState(false);
 
   const updateGeoJsonLayer = async (markers, setLayerFunc, zoneType) => {
-    if (markers.length >= 10) { // Ensure there are at least 10 markers
+    if (markers.length >= 10 && markers.length % 10 == 0) { // Ensure there are at least 10 markers
         // Extract the last 10 markers
         const lastTenMarkers = markers.slice(-10);
         
