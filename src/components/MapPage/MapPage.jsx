@@ -64,12 +64,13 @@ const MapPage = () => {
       const lastTenMarkers = markers.slice(-10);
 
       // Calculate the convex hull (if needed)
-      const points = lastTenMarkers.map(marker =>
-        turf.point([marker.position[1], marker.position[0]])
-      );
+      const points = lastTenMarkers.map(marker => turf.point([marker.position[1], marker.position[0]]));
       const featureCollection = turf.featureCollection(points);
       const hull = turf.convex(featureCollection);
-      setLayerFunc(layers => [...layers, hull]);
+
+      if (hull) {
+        setLayerFunc(layers => [...layers, hull]);
+      }
 
       // Determine endpoint
       const endpoint =
@@ -81,14 +82,14 @@ const MapPage = () => {
       const payload = {
         markers: lastTenMarkers.map(marker => {
           if (zoneType === "dangerous") {
-            const key = `${marker.position[1]},${marker.position[0]}`;
+            const key = `${marker.position[0]},${marker.position[1]}`;
             return {
-              coordinates: [marker.position[1], marker.position[0]], // Assuming your backend expects [lng, lat]
+              coordinates: marker.position, // Assuming your backend expects [lat, lng]
               description: dangerousDescriptions[key] || marker.description || "No description"
             };
           } else {
             return {
-              coordinates: [marker.position[1], marker.position[0]]
+              coordinates: marker.position // Assuming your backend expects [lat, lng]
             };
           }
         })
@@ -110,15 +111,18 @@ const MapPage = () => {
       const response = await axios.get("http://localhost:3001/safezones");
       const safeZones = response.data;
 
-      // Extract markers
+      // Extract markers directly without reversing coordinates
       const safeMarkersFromZones = safeZones.reduce((acc, zone) => {
-        return acc.concat(zone.markers.map(marker => ({ position: marker.coordinates.reverse() })));
+        return acc.concat(zone.markers.map(marker => ({
+          position: marker.coordinates,
+          _id: marker._id // Ensure each marker has an _id
+        })));
       }, []);
       setSafeMarkers(existingMarkers => [...existingMarkers, ...safeMarkersFromZones]);
 
       // Process fetched zones to GeoJSON layers
       const safeGeoJsonData = safeZones.map(zone => {
-        const points = zone.markers.map(marker => turf.point(marker.coordinates.reverse()));
+        const points = zone.markers.map(marker => turf.point([marker.coordinates[1], marker.coordinates[0]]));
         const featureCollection = turf.featureCollection(points);
         return turf.convex(featureCollection); // Calculate the convex hull
       }).filter(Boolean); // Filter out any undefined results
@@ -136,18 +140,19 @@ const MapPage = () => {
       const response = await axios.get("http://localhost:3001/dangerzones");
       const dangerousZones = response.data;
 
-      // Extract markers
+      // Extract markers directly without reversing coordinates
       const dangerousMarkersFromZones = dangerousZones.reduce((acc, zone) => {
         return acc.concat(zone.markers.map(marker => ({
-          position: marker.coordinates.reverse(),
-          description: marker.description || "No description provided"
+          position: marker.coordinates,
+          description: marker.description || "No description provided",
+          _id: marker._id // Ensure each marker has an _id
         })));
       }, []);
       setDangerousMarkers(existingMarkers => [...existingMarkers, ...dangerousMarkersFromZones]);
 
       // Process fetched zones to GeoJSON layers
       const dangerousGeoJsonData = dangerousZones.map(zone => {
-        const points = zone.markers.map(marker => turf.point(marker.coordinates.reverse()));
+        const points = zone.markers.map(marker => turf.point([marker.coordinates[1], marker.coordinates[0]]));
         const featureCollection = turf.featureCollection(points);
         return turf.convex(featureCollection); // Calculate the convex hull
       }).filter(Boolean); // Filter out any undefined results
@@ -165,24 +170,59 @@ const MapPage = () => {
     fetchDangerousZones();
   }, []);
 
+  // Function to refresh zones after deletion
+  const refreshZones = async () => {
+    setSafeMarkers([]);
+    setDangerousMarkers([]);
+    setSafeGeoJsonLayers([]);
+    setDangerousGeoJsonLayers([]);
+    await fetchSafeZones();
+    await fetchDangerousZones();
+  };
+
   // Function to handle marker deletion
-  const handleMarkerDelete = (index, type) => {
+  const handleMarkerDelete = async (index, type) => {
     setDeleteButtonClicked(true);
+    let updatedMarkers = [];
+    let markerId;
+
     if (type === "safe") {
-      setSafeMarkers(prevMarkers => {
-        const updatedMarkers = prevMarkers.filter((_, i) => i !== index);
-        updateGeoJsonLayer(updatedMarkers, setSafeGeoJsonLayers, "safe");
-        return updatedMarkers;
-      });
+      updatedMarkers = [...safeMarkers];
+      markerId = updatedMarkers[index]._id;
+
+      // Delete marker from backend
+      try {
+        await axios.delete(`http://localhost:3001/safetymarkers/${markerId}`);
+      } catch (error) {
+        console.error(`Error deleting safe marker: ${error}`);
+      }
+
+      updatedMarkers.splice(index, 1);
+      setSafeMarkers(updatedMarkers);
+      await refreshZones(); // Refresh zones after deletion
+
     } else if (type === "dangerous") {
-      setDangerousMarkers(prevMarkers => {
-        const updatedMarkers = prevMarkers.filter((_, i) => i !== index);
-        updateGeoJsonLayer(updatedMarkers, setDangerousGeoJsonLayers, "dangerous");
-        return updatedMarkers;
-      });
+      updatedMarkers = [...dangerousMarkers];
+      markerId = updatedMarkers[index]._id;
+
+      // Delete marker from backend
+      try {
+        await axios.delete(`http://localhost:3001/dangermarkers/${markerId}`);
+      } catch (error) {
+        console.error(`Error deleting dangerous marker: ${error}`);
+      }
+
+      updatedMarkers.splice(index, 1);
+      setDangerousMarkers(updatedMarkers);
+      await refreshZones(); // Refresh zones after deletion
+
     } else if (type === "itinerary") {
-      setItineraryMarkers(prevMarkers => prevMarkers.filter((_, i) => i !== index));
+      updatedMarkers = [...itineraryMarkers];
+      updatedMarkers.splice(index, 1);
+      setItineraryMarkers(updatedMarkers);
     }
+
+    setDeleteButtonClicked(false);
   };
 
   // Function to calculate and set itinerary
