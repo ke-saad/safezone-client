@@ -58,36 +58,48 @@ const ViewUpdateSafeZone = () => {
   return (
     <div className="view-update-safe-zone-container">
       <div className="navbar">
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/admindashboard" className="nav-link">
-          Dashboard
-        </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
-        </Link>
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/admindashboard" className="nav-link">Dashboard</Link>
+        <Link to="/aboutus" class="nav-link">About Us</Link>
       </div>
-      <h2 className="title">View / Update Safe Zone</h2>
-      {message && <div className="message">{message}</div>}
-      {safeZone ? (
-        <form onSubmit={updateSafeZone} className="update-safe-zone-form">
-          <h3>Markers:</h3>
-          <ul>
-            {markers.map((marker, index) => (
-              <li key={index}>
-                Latitude: {marker.coordinates[1]}, Longitude: {marker.coordinates[0]}{" "}
-                <button type="button" onClick={() => removeMarker(index)}>Remove</button>
-              </li>
-            ))}
-          </ul>
-          <button type="button" onClick={addMarker}>Add Marker</button>
-          <button type="submit">Update Safe Zone</button>
-        </form>
-      ) : (
-        <p>Loading...</p>
-      )}
-      <div className="background-image"></div>
+      <div className="background-overlay"></div>
+      <div className="content">
+        <h2 className="title">View / Update Safe Zone</h2>
+        {message && <div className="message">{message}</div>}
+        {safeZone ? (
+          <form onSubmit={updateSafeZone} className="update-safe-zone-form">
+            <h3>Markers:</h3>
+            <div className="table-container">
+              <table className="markers-table">
+                <thead>
+                  <tr>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {markers.map((marker, index) => (
+                    <tr key={index}>
+                      <td>{marker.coordinates[1]}</td>
+                      <td>{marker.coordinates[0]}</td>
+                      <td>
+                        <button type="button" className="remove-button" onClick={() => removeMarker(index)}>Remove</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="button-group">
+              <button type="button" className="add-button" onClick={addMarker}>Add Marker</button>
+              <button type="submit" className="update-button">Update Safe Zone</button>
+            </div>
+          </form>
+        ) : (
+          <p>Loading...</p>
+        )}
+      </div>
     </div>
   );
 };

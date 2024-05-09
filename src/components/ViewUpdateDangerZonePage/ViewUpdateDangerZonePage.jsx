@@ -26,9 +26,7 @@ const ViewUpdateDangerZone = () => {
     e.preventDefault();
 
     try {
-      await axios.put(`http://localhost:3001/dangerzones/${id}`, {
-        markers
-      });
+      await axios.put(`http://localhost:3001/dangerzones/${id}`, { markers });
       setMessage("Danger zone updated successfully.");
       navigate("/viewalldangerzones");
     } catch (error) {
@@ -46,7 +44,7 @@ const ViewUpdateDangerZone = () => {
   const addMarker = () => {
     const lat = prompt("Enter Latitude:");
     const lng = prompt("Enter Longitude:");
-    const description = prompt("Enter Description:"); // Prompt for description
+    const description = prompt("Enter Description:");
     if (lat && lng && description) {
       setMarkers([...markers, { coordinates: [parseFloat(lng), parseFloat(lat)], description }]);
     }
@@ -59,37 +57,50 @@ const ViewUpdateDangerZone = () => {
   return (
     <div className="view-update-danger-zone-container">
       <div className="navbar">
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/admindashboard" className="nav-link">
-          Dashboard
-        </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
-        </Link>
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/admindashboard" className="nav-link">Dashboard</Link>
+        <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
-      <h2 className="title">View / Update Danger Zone</h2>
-      {message && <div className="message">{message}</div>}
-      {dangerZone ? (
-        <form onSubmit={updateDangerZone} className="update-danger-zone-form">
-          <h3>Markers:</h3>
-          <ul>
-            {markers.map((marker, index) => (
-              <li key={index}>
-                Latitude: {marker.coordinates[1]}, Longitude: {marker.coordinates[0]}{" "}
-                Description: {marker.description} {/* Display description */}
-                <button type="button" onClick={() => removeMarker(index)}>Remove</button>
-              </li>
-            ))}
-          </ul>
-          <button type="button" onClick={addMarker}>Add Marker</button>
-          <button type="submit">Update Danger Zone</button>
-        </form>
-      ) : (
-        <p>Loading...</p>
-      )}
-      <div className="background-image"></div>
+      <div className="background-overlay"></div>
+      <div className="content">
+        <h2 className="title">View / Update Danger Zone</h2>
+        {message && <div className="message">{message}</div>}
+        {dangerZone ? (
+          <form onSubmit={updateDangerZone} className="update-danger-zone-form">
+            <h3>Markers:</h3>
+            <div className="table-container">
+              <table className="markers-table">
+                <thead>
+                  <tr>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {markers.map((marker, index) => (
+                    <tr key={index}>
+                      <td>{marker.coordinates[1]}</td>
+                      <td>{marker.coordinates[0]}</td>
+                      <td>{marker.description}</td>
+                      <td>
+                        <button type="button" className="remove-button" onClick={() => removeMarker(index)}>Remove</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="button-group">
+              <button type="button" className="add-button" onClick={addMarker}>Add Marker</button>
+              <button type="submit" className="update-button">Update Danger Zone</button>
+            </div>
+          </form>
+        ) : (
+          <p>Loading...</p>
+        )}
+      </div>
     </div>
   );
 };

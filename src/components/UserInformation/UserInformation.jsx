@@ -12,7 +12,7 @@ const UserInformation = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [showConfirmation, setShowConfirmation] = useState(false); // State to control deletion confirmation modal
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -31,16 +31,15 @@ const UserInformation = () => {
 
   const handleUpdateUser = async () => {
     try {
-      // Check if any fields are changed or filled
       if (!newUsername && !newPassword && isAdmin === user.isAdmin) {
         setErrorMessage("Please update at least one field");
         return;
       }
 
       const updatedUser = {
-        ...(newUsername && { username: newUsername }), // Only add username if it's changed or filled
-        ...(newPassword && { password: newPassword }), // Only add password if it's changed or filled
-        ...(isAdmin !== user.isAdmin && { isAdmin }), // Only add isAdmin if it's changed
+        ...(newUsername && { username: newUsername }),
+        ...(newPassword && { password: newPassword }),
+        ...(isAdmin !== user.isAdmin && { isAdmin }),
       };
 
       const response = await axios.put(`http://localhost:3001/users/${user._id}`, updatedUser);
@@ -79,7 +78,7 @@ const UserInformation = () => {
       console.error("Error deleting user:", error);
       setErrorMessage("Failed to delete user");
     }
-    setShowConfirmation(false); // Hide confirmation modal after deletion
+    setShowConfirmation(false);
   };
 
   const handleCancelDelete = () => {
@@ -87,38 +86,44 @@ const UserInformation = () => {
   };
 
   return (
-    <div className="user-information">
+    <div className="user-information-container">
       <div className="navbar">
         <Link className="nav-link" to="/aboutus">About Us</Link>
         <Link className="nav-link" to="/">Logout</Link>
       </div>
-      <div className="background-image"></div>
+      <div className="background-overlay"></div>
       <div className="content">
         {user && (
           <div>
             <h2>User Information</h2>
-            <p><label>Username: </label>{user.username}</p><br/><br/>
-            <p><label>Administrative privileges: </label>{user.isAdmin ? "Yes" : "No"}</p><br/><br/>
-            <div>
+            <div className="info-item">
+              <label>Username:</label>
+              <span>{user.username}</span>
+            </div>
+            <div className="info-item">
+              <label>Administrative Privileges:</label>
+              <span>{user.isAdmin ? "Yes" : "No"}</span>
+            </div>
+            <div className="input-item">
               <label htmlFor="newUsername">New Username:</label>
               <input
                 type="text"
                 id="newUsername"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
-              /><br/><br/>
+              />
             </div>
-            <div>
+            <div className="input-item">
               <label htmlFor="newPassword">New Password:</label>
               <input
                 type="password"
                 id="newPassword"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-              /><br/><br/>
+              />
             </div>
-            <div>
-              <label htmlFor="isAdmin">Administrative privileges:</label>
+            <div className="input-item">
+              <label htmlFor="isAdmin">Administrative Privileges:</label>
               <input
                 type="checkbox"
                 id="isAdmin"

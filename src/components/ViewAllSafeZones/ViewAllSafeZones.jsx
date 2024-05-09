@@ -37,46 +37,41 @@ const ViewAllSafeZones = () => {
   return (
     <div className="view-all-safe-zones-container">
       <div className="navbar">
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/admindashboard" className="nav-link">
-          Dashboard
-        </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
-        </Link>
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/admindashboard" className="nav-link">Dashboard</Link>
+        <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
-      <h2 className="view-all-safe-zones-title">All Safe Zones</h2>
-      {error && <div className="error-message">{error}</div>}
-      <div className="table-container">
-        <table className="safe-zone-table">
-          <thead>
-            <tr>
-              <th>Zone</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {safeZones.map((safeZone, index) => (
-              <tr key={safeZone._id}>
-                <td>Zone {index + 1}</td>
-                <td>
-                  <button onClick={() => handleEdit(safeZone._id)}>
-                    Show complete safe zone information
-                  </button>
-                  <button onClick={() => handleEdit(safeZone._id)}>Edit</button>
-                  <button onClick={() => deleteSafeZone(safeZone._id)}>Delete</button>
-                </td>
+      <div className="background-overlay"></div>
+      <div className="content">
+        <h2 className="view-all-safe-zones-title">All Safe Zones</h2>
+        {error && <div className="error-message">{error}</div>}
+        <div className="table-container">
+          <table className="safe-zone-table">
+            <thead>
+              <tr>
+                <th>Zone</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {safeZones.map((safeZone, index) => (
+                <tr key={safeZone._id}>
+                  <td>Zone {index + 1}</td>
+                  <td>
+                    <button className="action-button" onClick={() => handleEdit(safeZone._id)}>
+                      Show complete safe zone information
+                    </button>
+                    <button className="action-button" onClick={() => handleEdit(safeZone._id)}>Edit</button>
+                    <button className="delete-button" onClick={() => deleteSafeZone(safeZone._id)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div className="background-image"></div>
     </div>
-       );
-      };
-      
-      export default ViewAllSafeZones;
-      
+  );
+};
+
+export default ViewAllSafeZones;

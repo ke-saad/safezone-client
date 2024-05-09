@@ -56,58 +56,54 @@ const AddDangerZonePage = () => {
   return (
     <div className="add-danger-zone-container">
       <div className="navbar">
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
-        </Link>
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
-      <h2>Add Danger Zone</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Latitude:
-          <input
-            type="text"
-            value={latitude}
-            onChange={(e) => setLatitude(e.target.value)}
-          />
-        </label>
-        <label>
-          Longitude:
-          <input
-            type="text"
-            value={longitude}
-            onChange={(e) => setLongitude(e.target.value)}
-          />
-        </label>
-        <label>
-          Description:
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </label>
-        <button type="button" onClick={addMarker}>
-          Add Marker
-        </button>
-        <button type="submit">Create Danger Zone</button>
-      </form>
-      {message && <div className="message">{message}</div>}
-      <div className="markers-list">
-        <h3>Markers ({markers.length}/10)</h3>
-        <ul>
-          {markers.map((marker, index) => (
-            <li key={index}>
-              Latitude: {marker.coordinates[1]}, Longitude: {marker.coordinates[0]}
-              Description: {marker.description}
-              <button type="button" onClick={() => removeMarker(index)}>
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
+      <div className="background-overlay"></div>
+      <div className="content">
+        <h2>Add Danger Zone</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="input-item">
+            <label>Latitude:</label>
+            <input
+              type="text"
+              value={latitude}
+              onChange={(e) => setLatitude(e.target.value)}
+            />
+          </div>
+          <div className="input-item">
+            <label>Longitude:</label>
+            <input
+              type="text"
+              value={longitude}
+              onChange={(e) => setLongitude(e.target.value)}
+            />
+          </div>
+          <div className="input-item">
+            <label>Description:</label>
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+          <div className="button-group">
+            <button type="button" className="add-button" onClick={addMarker}>Add Marker</button>
+            <button type="submit" className="submit-button">Create Danger Zone</button>
+          </div>
+        </form>
+        {message && <div className="message">{message}</div>}
+        <div className="markers-list">
+          <h3>Markers ({markers.length}/10)</h3>
+          <ul>
+            {markers.map((marker, index) => (
+              <li key={index}>
+                Latitude: {marker.coordinates[1]}, Longitude: {marker.coordinates[0]}, Description: {marker.description}
+                <button type="button" className="remove-button" onClick={() => removeMarker(index)}>Remove</button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

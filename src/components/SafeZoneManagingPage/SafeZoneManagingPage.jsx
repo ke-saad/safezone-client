@@ -21,9 +21,6 @@ const SafeZoneManagingPage = () => {
         <Link to="/viewallsafezones" className="action-button">
           View All Safe Zones
         </Link>
-        <Link to="/viewupdatesafezone" className="action-button">
-          View / Update a Safe Zone
-        </Link>
         {/* Add more action buttons as needed */}
       </div>
       <div className="background-image"></div>

@@ -21,9 +21,6 @@ const DangerZoneManagingPage = () => {
         <Link to="/viewalldangerzones" className="action-button">
           View All Danger Zones
         </Link>
-        <Link to="/viewupdatedangerzone" className="action-button">
-          View / Update a Danger Zone
-        </Link>
         {/* Add more action buttons as needed */}
       </div>
       <div className="background-image"></div>

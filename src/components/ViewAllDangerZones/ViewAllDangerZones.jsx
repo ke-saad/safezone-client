@@ -37,46 +37,39 @@ const ViewAllDangerZones = () => {
   return (
     <div className="view-all-danger-zones-container">
       <div className="navbar">
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/admindashboard" className="nav-link">
-          Dashboard
-        </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
-        </Link>
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/admindashboard" className="nav-link">Dashboard</Link>
+        <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
-      <h2 className="view-all-danger-zones-title">All Danger Zones</h2>
-      {error && <div className="error-message">{error}</div>}
-      <div className="table-container">
-        <table className="danger-zone-table">
-          <thead>
-            <tr>
-              <th>Zone</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dangerZones.map((dangerZone, index) => (
-              <tr key={dangerZone._id}>
-                <td>Zone {index + 1}</td>
-                <td>
-                  <button onClick={() => handleEdit(dangerZone._id)}>
-                    Show complete danger zone information
-                  </button>
-                  <button onClick={() => handleEdit(dangerZone._id)}>Edit</button>
-                  <button onClick={() => deleteDangerZone(dangerZone._id)}>Delete</button>
-                </td>
+      <div className="background-overlay"></div>
+      <div className="content">
+        <h2 className="view-all-danger-zones-title">All Danger Zones</h2>
+        {error && <div className="error-message">{error}</div>}
+        <div className="table-container">
+          <table className="danger-zone-table">
+            <thead>
+              <tr>
+                <th>Zone</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {dangerZones.map((dangerZone, index) => (
+                <tr key={dangerZone._id}>
+                  <td>Zone {index + 1}</td>
+                  <td>
+                    <button className="action-button" onClick={() => handleEdit(dangerZone._id)}>Show Information</button>
+                    <button className="action-button" onClick={() => handleEdit(dangerZone._id)}>Edit</button>
+                    <button className="delete-button" onClick={() => deleteDangerZone(dangerZone._id)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div className="background-image"></div>
     </div>
-       );
-      };
-      
-      export default ViewAllDangerZones;
-      
+  );
+};
+
+export default ViewAllDangerZones;

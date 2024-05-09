@@ -1,3 +1,4 @@
+/* General Reset */
 body, html, #root {
   margin: 0;
   padding: 0;
@@ -6,8 +7,22 @@ body, html, #root {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Background Overlay */
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("../Images/world_map.jpg");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  z-index: -1;
+}
+
 /* User Information Container */
-.user-information {
+.user-information-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -46,13 +61,15 @@ body, html, #root {
 
 /* Content */
 .content {
-  width: 50%; /* Reduced width to make the form smaller */
-  max-width: 600px; /* Add a maximum width */
+  width: 50%;
+  max-width: 600px;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
   text-align: left;
+  position: relative;
+  z-index: 1;
 }
 
 .content h2 {
@@ -63,33 +80,49 @@ body, html, #root {
   text-shadow: 2px 2px 4px rgba(46, 59, 78, 0.5);
 }
 
-.content label {
+.info-item {
+  margin-bottom: 15px;
+}
+
+.info-item label {
+  font-weight: bold;
+  color: #2e3b4e;
+}
+
+.info-item span {
+  margin-left: 10px;
+}
+
+.input-item {
+  margin-bottom: 15px;
+}
+
+.input-item label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
   color: #2e3b4e;
 }
 
-.content input[type="text"],
-.content input[type="password"] {
+.input-item input[type="text"],
+.input-item input[type="password"] {
   width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s ease;
 }
 
-.content input[type="text"]:focus,
-.content input[type="password"]:focus {
+.input-item input[type="text"]:focus,
+.input-item input[type="password"]:focus {
   outline: none;
   border-width: 3px;
   border-color: #378ce7;
   box-shadow: 0 0 5px rgba(55, 140, 231, 0.5);
 }
 
-.content input[type="checkbox"] {
+.input-item input[type="checkbox"] {
   margin-left: 10px;
 }
 
