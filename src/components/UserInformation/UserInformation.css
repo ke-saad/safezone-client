@@ -1,4 +1,3 @@
-/* General Reset */
 body, html, #root {
   margin: 0;
   padding: 0;
@@ -7,22 +6,8 @@ body, html, #root {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Background Overlay */
-.background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("../Images/image.png");
-  background-size: cover;
-  background-position: center;
-  opacity: 0.5;
-  z-index: -1;
-}
-
 /* User Information Container */
-.user-information-container {
+.user-information {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -59,40 +44,173 @@ body, html, #root {
   transform: scale(1.05);
 }
 
-/* Info Title */
-.info-title {
+/* Content */
+.content {
+  width: 50%; /* Reduced width to make the form smaller */
+  max-width: 600px; /* Add a maximum width */
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.content h2 {
   font-size: 32px;
-  margin-top: 20px;
   margin-bottom: 20px;
   font-weight: bold;
   color: #2e3b4e;
   text-shadow: 2px 2px 4px rgba(46, 59, 78, 0.5);
 }
 
-/* User Details */
-.user-details {
-  margin-top: 20px;
-  width: 70%;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+.content label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #2e3b4e;
 }
 
-.user-details p {
-  margin: 10px 0;
-  font-size: 18px;
+.content input[type="text"],
+.content input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.content input[type="text"]:focus,
+.content input[type="password"]:focus {
+  outline: none;
+  border-width: 3px;
+  border-color: #378ce7;
+  box-shadow: 0 0 5px rgba(55, 140, 231, 0.5);
+}
+
+.content input[type="checkbox"] {
+  margin-left: 10px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.update-button,
+.cancel-button,
+.delete-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.update-button {
+  background-color: #378ce7;
+  color: white;
+}
+
+.update-button:hover {
+  background-color: #124076;
+  transform: scale(1.05);
+}
+
+.cancel-button {
+  background-color: #ccc;
   color: #2e3b4e;
+}
+
+.cancel-button:hover {
+  background-color: #bbb;
+  transform: scale(1.05);
+}
+
+.delete-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #c0392b;
+  transform: scale(1.05);
 }
 
 .error-message {
   color: #e72929;
-  margin: 10px;
+  margin-top: 10px;
   text-align: center;
 }
 
-.loading-message {
-  margin: 20px 0;
+.success-message {
+  color: #4caf50;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Confirmation Modal */
+.confirmation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.confirmation-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-message {
+  text-align: center;
   font-size: 18px;
+  margin-bottom: 20px;
   color: #2e3b4e;
+}
+
+.confirmation-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.confirmation-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.confirmation-buttons button:first-of-type {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.confirmation-buttons button:first-of-type:hover {
+  background-color: #c0392b;
+  transform: scale(1.05);
+}
+
+.confirmation-buttons button:last-of-type {
+  background-color: #ccc;
+  color: #2e3b4e;
+}
+
+.confirmation-buttons button:last-of-type:hover {
+  background-color: #bbb;
+  transform: scale(1.05);
 }
