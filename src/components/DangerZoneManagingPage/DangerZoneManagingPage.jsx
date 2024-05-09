@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./SafeZoneManagingPage.css";
+import "./DangerZoneManagingPage.css";
 
-const SafeZoneManagingPage = () => {
+const DangerZoneManagingPage = () => {
   return (
-    <div className="safe-zone-managing-page">
+    <div className="danger-zone-managing-page">
       <div className="navbar">
         <Link to="/aboutus" className="nav-link">
           About Us
@@ -13,16 +13,16 @@ const SafeZoneManagingPage = () => {
           Logout
         </Link>
       </div>
-      <h2>Manage Safe Zones</h2>
+      <h2>Manage Danger Zones</h2>
       <div className="action-buttons">
-        <Link to="/addsafezone " className="action-button">
-          Add a Safe Zone
+        <Link to="/adddangerzone " className="action-button">
+          Add a Danger Zone
         </Link>
-        <Link to="/viewallsafezones" className="action-button">
-          View All Safe Zones
+        <Link to="/viewalldangerzones" className="action-button">
+          View All Danger Zones
         </Link>
-        <Link to="/viewupdatesafezone" className="action-button">
-          View / Update a Safe Zone
+        <Link to="/viewupdatedangerzone" className="action-button">
+          View / Update a Danger Zone
         </Link>
         {/* Add more action buttons as needed */}
       </div>
@@ -31,4 +31,4 @@ const SafeZoneManagingPage = () => {
   );
 };
 
-export default SafeZoneManagingPage;
+export default DangerZoneManagingPage;

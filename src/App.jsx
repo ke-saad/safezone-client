@@ -15,7 +15,11 @@ import UserInformation from './components/UserInformation/UserInformation';
 import SafeZoneManagingPage from './components/SafeZoneManagingPage/SafeZoneManagingPage';
 import AddSafeZonePage from './components/AddSafeZonePage/AddSafeZonePage';
 import ViewAllSafeZones from './components/ViewAllSafeZones/ViewAllSafeZones';
-
+import ViewUpdateSafeZone from './components/ViewUpdateSafeZone/ViewUpdateSafeZone';
+import DangerZoneManagingPage from './components/DangerZoneManagingPage/DangerZoneManagingPage';
+import AddDangerZonePage from './components/AddDangerZonePage/AddDangerZonePage';
+import ViewAllDangerZones from './components/ViewAllDangerZones/ViewAllDangerZones';
+import ViewUpdateDangerZonePage from './components/ViewUpdateDangerZonePage/ViewUpdateDangerZonePage';
 
 function App() {
   return (
@@ -38,6 +42,11 @@ function App() {
         <Route path='/safezonesmanagingpage' element={<SafeZoneManagingPage />} />
         <Route path='/addsafezone' element={<AddSafeZonePage />} />
         <Route path='/viewallsafezones' element={<ViewAllSafeZones />} />
+        <Route path='/viewupdatesafezone/:id' element={<ViewUpdateSafeZone />} />
+        <Route path='/dangerzonesmanagingpage' element={<DangerZoneManagingPage />} />
+        <Route path='/adddangerzone' element={<AddDangerZonePage />} />
+        <Route path='/viewalldangerzones' element={<ViewAllDangerZones />} />
+        <Route path='/viewupdatedangerzone/:id' element={<ViewUpdateDangerZonePage />} />
       </Routes>
     </BrowserRouter>
   );

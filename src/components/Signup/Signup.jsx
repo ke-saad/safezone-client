@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Signup.css";
 
-const Signup = ({ resetLoginForm }) => {
+const Signup = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -77,22 +77,14 @@ const Signup = ({ resetLoginForm }) => {
   return (
     <div className="signup-container">
       <div className="navbar">
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/admindashboard" className="nav-link">
-          Dashboard
-        </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
-        </Link>
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/admindashboard" className="nav-link">Dashboard</Link>
+        <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
-      <h2 className="signup-title">Add a new user</h2>
+      <h2 className="signup-title">Add a New User</h2>
       {error && <div className="error-message">{error}</div>}
-      {successMessage && (
-        <div className="success-message">{successMessage}</div>
-      )}
-      <form onSubmit={handleSubmit}>
+      {successMessage && <div className="success-message">{successMessage}</div>}
+      <form onSubmit={handleSubmit} className="signup-form">
         <input
           type="text"
           className="signup-input"
@@ -132,11 +124,9 @@ const Signup = ({ resetLoginForm }) => {
           />
           <label htmlFor="isAdmin">Admin?</label>
         </div>
-        <button type="submit" className="signup-button">
-          Add user
-        </button>
+        <button type="submit" className="signup-button">Add User</button>
       </form>
-      <div className="background-image"></div>
+      <div className="background-overlay"></div>
     </div>
   );
 };

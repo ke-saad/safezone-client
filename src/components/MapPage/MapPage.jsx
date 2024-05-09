@@ -1,4 +1,3 @@
-// Import necessary packages and components
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -149,6 +148,14 @@ const MapPage = () => {
         })));
       }, []);
       setDangerousMarkers(existingMarkers => [...existingMarkers, ...dangerousMarkersFromZones]);
+
+      // Populate dangerousDescriptions object
+      const descriptionsMap = {};
+      dangerousMarkersFromZones.forEach(marker => {
+        const key = `${marker.position[0]},${marker.position[1]}`;
+        descriptionsMap[key] = marker.description;
+      });
+      setDangerousDescriptions(descriptionsMap);
 
       // Process fetched zones to GeoJSON layers
       const dangerousGeoJsonData = dangerousZones.map(zone => {

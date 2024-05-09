@@ -1,73 +1,109 @@
+/* General Reset */
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Background Overlay */
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("../Images/world_map.jpg");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* View All Users Container */
 .view-all-users-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    top: 0;
-    left: 0;
-    color: #378ce7;
-    font-family: Monaco, monospace;
-    overflow: hidden; /* Prevent page scrolling */
-  }
-  
-  .navbar {
-    background-color: #378ce7;
-    padding: 10px 0;
-  }
-  
-  .nav-link {
-    color: white;
-    margin-right: 10px;
-    text-decoration: wavy underline;
-  }
-  
-  .view-all-users-title {
-    font-size: 36px;
-    margin-top: 50px;
-    font-weight: bolder;
-  }
-  
-  .error-message {
-    color: #e72929;
-    margin-bottom: 10px;
-  }
-  
-  .table-container {
-    margin: auto 50px ; 
-    max-height: calc(100% - 150px); /* Set max height for the table container */
-    overflow-y: auto; 
-  }
-  
-  .user-table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  
-  .user-table th,
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  color: #2e3b4e;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #2e3b4e;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link {
+  color: #ffffff;
+  margin-left: 15px;
+  text-decoration: none;
+  padding: 5px 15px;
+  border-radius: 5px;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.nav-link:hover {
+  background-color: #3b4c67;
+  transform: scale(1.05);
+}
+
+/* View All Users Title */
+.view-all-users-title {
+  font-size: 32px;
+  margin-top: 50px;
+  margin-bottom: 30px;
+  font-weight: bold;
+  color: #2e3b4e;
+  text-shadow: 2px 2px 4px rgba(46, 59, 78, 0.5);
+}
+
+/* Error Message */
+.error-message {
+  color: #e72929;
+  margin-bottom: 10px;
+}
+
+/* Table Container */
+.table-container {
+  margin: 0 auto;
+  max-height: calc(100% - 150px);
+  width: 80%;
+  overflow-y: auto;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+}
+
+/* User Table */
+.user-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.user-table th,
 .user-table td {
   border: 1px solid #ccc;
   padding: 8px;
-  background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white color */
-  width: 33.33%; /* Equal width for all columns */
-  box-sizing: border-box; /* Include padding and border in the width */
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
-  
-  .user-table th {
-    background-color: #378ce7;
-    color: white;
-  }
-  
-  .background-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("../Images/world_map.jpg");
-    background-size: cover;
-    background-position: center;
-    opacity: 0.4;
-    z-index: -1;
-  }
-  
+.user-table th {
+  background-color: #378ce7;
+  color: white;
+}
+
+.user-table tr:nth-child(even) {
+  background-color: rgba(55, 140, 231, 0.1);
+}

@@ -1,23 +1,36 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./ViewAllSafeZones.css";
 
 const ViewAllSafeZones = () => {
   const [safeZones, setSafeZones] = useState([]);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const fetchSafeZones = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/safezones");
+      setSafeZones(response.data);
+    } catch (error) {
+      setError("Failed to fetch safe zones.");
+    }
+  };
+
+  const deleteSafeZone = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3001/safezones/${id}`);
+      fetchSafeZones(); // Refresh after deletion
+    } catch (error) {
+      setError("Failed to delete safe zone.");
+    }
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/viewupdatesafezone/${id}`);
+  };
 
   useEffect(() => {
-    const fetchSafeZones = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/safezones");
-        const sortedSafeZones = response.data.sort((a, b) => a.name.localeCompare(b.name)); // Sort safe zones alphabetically by name
-        setSafeZones(sortedSafeZones);
-      } catch (error) {
-        setError("Failed to fetch safe zones");
-      }
-    };
-
     fetchSafeZones();
   }, []);
 
@@ -40,19 +53,21 @@ const ViewAllSafeZones = () => {
         <table className="safe-zone-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Location</th>
-              <th>Capacity</th>
+              <th>Zone</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {safeZones.map((safeZone) => (
+            {safeZones.map((safeZone, index) => (
               <tr key={safeZone._id}>
-                <td>{safeZone._id}</td>
-                <td>{safeZone.name}</td>
-                <td>{safeZone.location}</td>
-                <td>{safeZone.capacity}</td>
+                <td>Zone {index + 1}</td>
+                <td>
+                  <button onClick={() => handleEdit(safeZone._id)}>
+                    Show complete safe zone information
+                  </button>
+                  <button onClick={() => handleEdit(safeZone._id)}>Edit</button>
+                  <button onClick={() => deleteSafeZone(safeZone._id)}>Delete</button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -60,7 +75,8 @@ const ViewAllSafeZones = () => {
       </div>
       <div className="background-image"></div>
     </div>
-  );
-};
-
-export default ViewAllSafeZones;
+       );
+      };
+      
+      export default ViewAllSafeZones;
+      

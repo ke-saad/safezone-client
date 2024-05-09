@@ -1,0 +1,97 @@
+.view-update-safe-zone-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .nav-link {
+    text-decoration: none;
+    color: #378ce7;
+    padding: 8px;
+    border: 1px solid #378ce7;
+    border-radius: 4px;
+  }
+  
+  h2.title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .message {
+    color: green;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .update-safe-zone-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .update-safe-zone-form h3 {
+    margin-top: 0;
+  }
+  
+  .update-safe-zone-form ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .update-safe-zone-form li {
+    margin-bottom: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .update-safe-zone-form label {
+    margin: 10px 0 5px 0;
+  }
+  
+  .update-safe-zone-form input {
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .update-safe-zone-form button {
+    padding: 8px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #378ce7;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .update-safe-zone-form button:hover {
+    background-color: #2b74b7;
+  }
+  
+  .background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.1;
+    background-image: url("background.jpg"); /* Replace with your background image */
+    background-size: cover;
+    background-position: center;
+  }
+  

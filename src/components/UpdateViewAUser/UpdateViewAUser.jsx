@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { Link } from "react-router-dom";
 import "./UpdateViewAUser.css";
 
 const UpdateViewAUser = () => {
@@ -31,19 +31,13 @@ const UpdateViewAUser = () => {
   }, [searchQuery]);
 
   return (
-    <div className="view-all-users-container">
+    <div className="update-view-user-container">
       <div className="navbar">
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/admindashboard" className="nav-link">
-          Dashboard
-        </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
-        </Link>
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/admindashboard" className="nav-link">Dashboard</Link>
+        <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
-      <h2 className="search-title">Search user</h2>
+      <h2 className="search-title">Search User</h2>
       <input
         type="text"
         className="search-input"
@@ -53,16 +47,16 @@ const UpdateViewAUser = () => {
       />
       <ul className="user-suggestions">
         {error ? (
-          <li>{error}</li>
+          <li className="error-message">{error}</li>
         ) : (
           searchResults.map((user) => (
             <li key={user._id}>
-                <Link to={`/userinformation/${user.username}`}>{user.username}</Link>
+              <Link to={`/userinformation/${user.username}`}>{user.username}</Link>
             </li>
           ))
         )}
       </ul>
-      <div className="background-image"></div>
+      <div className="background-overlay"></div>
     </div>
   );
 };

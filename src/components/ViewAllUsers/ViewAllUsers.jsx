@@ -11,7 +11,9 @@ const ViewAllUsers = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get("http://localhost:3001/users");
-        const sortedUsers = response.data.sort((a, b) => a.username.localeCompare(b.username)); // Sort users alphabetically by username
+        const sortedUsers = response.data.sort((a, b) =>
+          a.username.localeCompare(b.username)
+        ); // Sort users alphabetically by username
         setUsers(sortedUsers);
       } catch (error) {
         setError("Failed to fetch users");
@@ -56,7 +58,7 @@ const ViewAllUsers = () => {
           </tbody>
         </table>
       </div>
-      <div className="background-image"></div>
+      <div className="background-overlay"></div>
     </div>
   );
 };

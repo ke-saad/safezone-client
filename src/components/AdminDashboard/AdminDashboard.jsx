@@ -57,7 +57,7 @@ const AdminDashboard = () => {
   };
 
   const handleManageDangerZones = () => {
-    navigate("/admin/dangerzones");
+    navigate("/dangerzonesmanagingpage");
   };
 
   const handleManageActivityLogs = () => {
@@ -87,38 +87,36 @@ const AdminDashboard = () => {
       </div>
       {isAdmin && (
         <div className="center-content">
-          <h1>Admin Dashboard</h1>
-          <div className="background-wrapper">
-            <div className="card-container">
-              <div className="card" onClick={handleManageUsers}>
-                <img src={userIcon} alt="Manage Users" />
-                <p>Users</p>
-              </div>
-              <div className="card" onClick={handleManageSecurityZones}>
-                <img src={securityIcon} alt="Manage Security Zones" />
-                <p>Safe Zones</p>
-              </div>
-              <div className="card" onClick={handleManageDangerZones}>
-                <img src={dangerIcon} alt="Manage Danger Zones" />
-                <p>Danger Zones</p>
-              </div>
-              <div className="card" onClick={handleManageActivityLogs}>
-                <img src={activityIcon} alt="Manage Activity Logs" />
-                <p>Activity Logs</p>
-              </div>
-              <div className="card" onClick={handleManageAlerts}>
-                <img src={alertIcon} alt="Manage Alerts" />
-                <p>Alerts</p>
-              </div>
-              <div className="card" onClick={handleViewMap}>
-                <img src={mapIcon} alt="View Map" />
-                <p>Map</p>
-              </div>
+          <h1 className="dashboard-title">Admin Dashboard</h1>
+          <div className="card-container">
+            <div className="card" onClick={handleManageUsers}>
+              <img src={userIcon} alt="Manage Users" />
+              <p>Users</p>
+            </div>
+            <div className="card" onClick={handleManageSecurityZones}>
+              <img src={securityIcon} alt="Manage Security Zones" />
+              <p>Safe Zones</p>
+            </div>
+            <div className="card" onClick={handleManageDangerZones}>
+              <img src={dangerIcon} alt="Manage Danger Zones" />
+              <p>Danger Zones</p>
+            </div>
+            <div className="card" onClick={handleManageActivityLogs}>
+              <img src={activityIcon} alt="Manage Activity Logs" />
+              <p>Activity Logs</p>
+            </div>
+            <div className="card" onClick={handleManageAlerts}>
+              <img src={alertIcon} alt="Manage Alerts" />
+              <p>Alerts</p>
+            </div>
+            <div className="card" onClick={handleViewMap}>
+              <img src={mapIcon} alt="View Map" />
+              <p>Map</p>
             </div>
           </div>
         </div>
       )}
-      <div className="background-image"></div>
+      <div className="background-overlay"></div>
     </div>
   );
 };

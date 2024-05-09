@@ -1,154 +1,98 @@
-.user-information {
-  position: fixed;
-  /* padding-top: 50%px; */
-  padding-bottom: 100%;
+/* General Reset */
+body, html, #root {
+  margin: 0;
+  padding: 0;
   width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: center; /* Horizontally center */
-  align-items: center; /* Vertically center */
-  text-align: left;
-  color: #378ce7;
-  font-family: Monaco, monospace;
+  height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.content {
-  max-width: 400px;
-}
-
-.user-information h2 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.user-information p {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.user-information label {
-  font-weight: bold;
-}
-
-.user-information input {
-  margin-bottom: 10px;
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  outline: none;
-}
-
-.user-information input:focus {
-  border-color: #378ce7;
-  border-width: 2.5px;
-}
-
-.user-information .button-group {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.user-information button {
-  padding: 10px 20px;
-  background-color: #378ce7;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.user-information button:hover {
-  background-color: #266ab3;
-}
-
-.error-message,
-.success-message {
-  margin-top: 10px;
-}
-
-.error-message {
-  color: red;
-}
-
-.success-message {
-  color: green;
-}
-
-.navbar {
-  position: fixed;
+/* Background Overlay */
+.background-overlay {
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  padding: 10px 0;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  height: 100%;
+  background-image: url("../Images/image.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* User Information Container */
+.user-information-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  color: #2e3b4e;
+  overflow: hidden;
+}
+
+/* Navbar */
+.navbar {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #2e3b4e;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nav-link {
-  color: #378ce7;
-  margin-right: 10px;
+  color: #ffffff;
+  margin-left: 15px;
   text-decoration: none;
+  padding: 5px 15px;
+  border-radius: 5px;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
 .nav-link:hover {
-  text-decoration: underline;
+  background-color: #3b4c67;
+  transform: scale(1.05);
 }
 
-.background-image {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('../Images/world_map.jpg');
-  background-size: cover;
-  background-position: center;
-  opacity: 0.4;
-  z-index: -1;
-}
-.user-information button {
-  flex: 1; /* Make buttons equally sized */
-  margin-right: 10px; /* Add right margin for spacing between buttons */
+/* Info Title */
+.info-title {
+  font-size: 32px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #2e3b4e;
+  text-shadow: 2px 2px 4px rgba(46, 59, 78, 0.5);
 }
 
-.user-information button:last-child {
-  margin-right: 0; /* Remove right margin from last button */
-}
-.confirmation-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.confirmation-box {
-  background-color: white;
+/* User Details */
+.user-details {
+  margin-top: 20px;
+  width: 70%;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
   padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.user-details p {
+  margin: 10px 0;
+  font-size: 18px;
+  color: #2e3b4e;
+}
+
+.error-message {
+  color: #e72929;
+  margin: 10px;
   text-align: center;
 }
 
-.confirmation-message {
+.loading-message {
+  margin: 20px 0;
   font-size: 18px;
-  margin-bottom: 20px;
-}
-
-.confirmation-buttons button {
-  margin-right: 10px;
-}
-
-.confirmation-buttons button:last-child {
-  margin-right: 0;
+  color: #2e3b4e;
 }

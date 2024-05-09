@@ -13,19 +13,19 @@ const UsersManagingPage = () => {
           Logout
         </a>
       </div>
-      <h2>Manage users</h2>
+      <h2 className="page-title">Manage Users</h2>
       <div className="action-buttons">
         <Link to="/register" className="action-button">
-          Add a user
+          Add a User
         </Link>
         <Link to="/viewallusers" className="action-button">
-          View all users
+          View All Users
         </Link>
         <Link to="/updateviewauser" className="action-button">
-          View / update a user
+          View / Update a User
         </Link>
       </div>
-      <div className="background-image"></div>
+      <div className="background-overlay"></div>
     </div>
   );
 };
