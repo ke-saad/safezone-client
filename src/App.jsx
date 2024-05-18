@@ -20,6 +20,7 @@ import DangerZoneManagingPage from './components/DangerZoneManagingPage/DangerZo
 import AddDangerZonePage from './components/AddDangerZonePage/AddDangerZonePage';
 import ViewAllDangerZones from './components/ViewAllDangerZones/ViewAllDangerZones';
 import ViewUpdateDangerZonePage from './components/ViewUpdateDangerZonePage/ViewUpdateDangerZonePage';
+import LocationInfoPage from './components/LocationInfoPage/LocationInfoPage';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
         <Route path='/adddangerzone' element={<AddDangerZonePage />} />
         <Route path='/viewalldangerzones' element={<ViewAllDangerZones />} />
         <Route path='/viewupdatedangerzone/:id' element={<ViewUpdateDangerZonePage />} />
+        <Route path="/location/:lng/:lat" component={LocationInfoPage} />
       </Routes>
     </BrowserRouter>
   );

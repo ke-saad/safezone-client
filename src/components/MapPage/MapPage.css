@@ -18,7 +18,7 @@ body {
   top: 0;
   left: 0;
   right: 0; /* Ensure the navbar goes all the way to the right */
-  background-color: #378ce7;
+  background-color: #f8f8f8;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -86,7 +86,7 @@ body {
 }
 
 .control-button {
-  background-color: #378ce7; /* Match navbar color */
+  background-color: #f8f8f8; /* Match navbar color */
   border: none;
   padding: 5px; /* Reduce button padding for smaller size */
   border-radius: 5px;
