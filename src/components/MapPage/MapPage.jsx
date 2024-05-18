@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import {
@@ -20,6 +20,7 @@ import * as turf from "@turf/turf";
 import blueMarker from "../Images/blue_marker.png";
 import greenMarker from "../Images/green_marker.png";
 import redMarker from "../Images/red_marker.png";
+import yellowMarker from "../Images/yellow_marker.png"; // Import yellow marker
 
 // Import control icons
 import startItineraryIcon from "../Images/new_itinerary_icon.png";
@@ -28,7 +29,7 @@ import addDangerousIcon from "../Images/danger_location_icon.png";
 import calculateItineraryIcon from "../Images/calculate_itinerary_icon.png";
 
 // Define Popup content component
-const PopupContent = ({ title, description, position, onDelete }) => (
+const PopupContent = ({ title, description, position, onDelete, locationName }) => (
   <div>
     <h3>{title}</h3>
     {title === "Danger" ? (
@@ -36,10 +37,19 @@ const PopupContent = ({ title, description, position, onDelete }) => (
     ) : (
       <p>{description}</p>
     )}
-    <p>
-      ({position[1]}, {position[0]})
-    </p>
+    <p>{locationName ? locationName : `(${position[1]}, ${position[0]})`}</p>
+    <Link to={`/location/${position[1]}/${position[0]}`}>View full location information</Link>
     <button onClick={onDelete}>Delete</button>
+  </div>
+);
+
+// Custom confirmation dialog component
+const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
+  <div className="confirmation-dialog">
+    <p>{message}</p>
+    <button onClick={() => onConfirm("marker")}>The Marker Only</button>
+    <button onClick={() => onConfirm("zone")}>The Whole Zone</button>
+    <button onClick={onCancel}>Cancel</button>
   </div>
 );
 
@@ -55,12 +65,51 @@ const MapPage = () => {
   const [dangerousGeoJsonLayers, setDangerousGeoJsonLayers] = useState([]);
   const [dangerousDescriptions, setDangerousDescriptions] = useState({});
   const [deleteButtonClicked, setDeleteButtonClicked] = useState(false);
+  const [confirmationDialog, setConfirmationDialog] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState("location");
+  const [yellowMarkerPosition, setYellowMarkerPosition] = useState(null);
+  const [map, setMap] = useState(null);
+  const hoverTimeout = useRef(null); // To handle hover delay
+  const [hoveredMarker, setHoveredMarker] = useState(null); // To handle the popup
+
+  // Function to add marker to the database
+  const addMarkerToDatabase = async (marker, zoneType) => {
+    const endpoint = zoneType === "dangerous"
+      ? "http://localhost:3001/dangermarkers/add"
+      : "http://localhost:3001/safetymarkers/add";
+    
+    const payload = {
+      coordinates: marker.position,
+      description: marker.description || "",
+      timestamp: new Date().toISOString(),
+      ...(zoneType === "dangerous" && { exception: marker.exception || "" }) // Include exception attribute for danger markers
+    };
+
+    try {
+      const response = await axios.post(endpoint, payload);
+      return response.data; // return the newly created marker data
+    } catch (error) {
+      console.error(`Error adding ${zoneType} marker to the database:`, error);
+      return null;
+    }
+  };
 
   // Function to update GeoJSON layers
   const updateGeoJsonLayer = async (markers, setLayerFunc, zoneType) => {
     if (markers.length >= 10 && markers.length % 10 === 0) {
       // Extract the last 10 markers
       const lastTenMarkers = markers.slice(-10);
+
+      // Check timestamp difference
+      const firstTimestamp = new Date(lastTenMarkers[0].timestamp).getTime();
+      const lastTimestamp = new Date(lastTenMarkers[lastTenMarkers.length - 1].timestamp).getTime();
+      const timeDifference = (lastTimestamp - firstTimestamp) / 1000; // in seconds
+
+      if (timeDifference > 90) {
+        console.error("Markers were not added within 90 seconds. Zone creation failed.");
+        return;
+      }
 
       // Calculate the convex hull (if needed)
       const points = lastTenMarkers.map(marker => turf.point([marker.position[1], marker.position[0]]));
@@ -79,24 +128,20 @@ const MapPage = () => {
 
       // Format payload according to the zone type
       const payload = {
-        markers: lastTenMarkers.map(marker => {
-          if (zoneType === "dangerous") {
-            const key = `${marker.position[0]},${marker.position[1]}`;
-            return {
-              coordinates: marker.position, // Assuming your backend expects [lat, lng]
-              description: dangerousDescriptions[key] || marker.description || "No description"
-            };
-          } else {
-            return {
-              coordinates: marker.position // Assuming your backend expects [lat, lng]
-            };
-          }
-        })
+        markers: lastTenMarkers.map(marker => ({
+          coordinates: marker.position,
+          description: marker.description || "",
+          timestamp: marker.timestamp,
+          ...(zoneType === "dangerous" && { exception: marker.exception || "" }) // Include exception attribute for danger markers
+        }))
       };
 
       // Make the Axios POST request
       try {
         const response = await axios.post(endpoint, payload);
+        // Ensure markers get the zone ID
+        const zoneId = response.data._id;
+        lastTenMarkers.forEach(marker => marker.zone = zoneId);
         console.log(`${zoneType} zones added to the database:`, response.data);
       } catch (error) {
         console.error(`Error adding ${zoneType} zones to the database:`, error);
@@ -114,7 +159,9 @@ const MapPage = () => {
       const safeMarkersFromZones = safeZones.reduce((acc, zone) => {
         return acc.concat(zone.markers.map(marker => ({
           position: marker.coordinates,
-          _id: marker._id // Ensure each marker has an _id
+          _id: marker._id,
+          zone: zone._id, // Store the parent zone ID in the marker
+          timestamp: marker.timestamp
         })));
       }, []);
       setSafeMarkers(existingMarkers => [...existingMarkers, ...safeMarkersFromZones]);
@@ -144,7 +191,10 @@ const MapPage = () => {
         return acc.concat(zone.markers.map(marker => ({
           position: marker.coordinates,
           description: marker.description || "No description provided",
-          _id: marker._id // Ensure each marker has an _id
+          _id: marker._id,
+          zone: zone._id, // Store the parent zone ID in the marker
+          timestamp: marker.timestamp,
+          exception: marker.exception || "" // Store the exception attribute for danger markers
         })));
       }, []);
       setDangerousMarkers(existingMarkers => [...existingMarkers, ...dangerousMarkersFromZones]);
@@ -188,40 +238,63 @@ const MapPage = () => {
   };
 
   // Function to handle marker deletion
-  const handleMarkerDelete = async (index, type) => {
+  const handleMarkerDelete = async (index, type, choice) => {
     setDeleteButtonClicked(true);
     let updatedMarkers = [];
     let markerId;
+    let zoneId;
 
     if (type === "safe") {
       updatedMarkers = [...safeMarkers];
       markerId = updatedMarkers[index]._id;
+      zoneId = updatedMarkers[index].zone;
 
-      // Delete marker from backend
-      try {
-        await axios.delete(`http://localhost:3001/safetymarkers/${markerId}`);
-      } catch (error) {
-        console.error(`Error deleting safe marker: ${error}`);
+      if (choice === "zone") {
+        // Delete whole zone
+        try {
+          await axios.delete(`http://localhost:3001/safezones/${zoneId}`);
+        } catch (error) {
+          console.error(`Error deleting safe zone: ${error}`);
+        }
+        setSafeMarkers([]);
+        await refreshZones();
+      } else if (choice === "marker") {
+        // Delete marker
+        try {
+          await axios.delete(`http://localhost:3001/safetymarkers/${markerId}`);
+        } catch (error) {
+          console.error(`Error deleting safe marker: ${error}`);
+        }
+        updatedMarkers.splice(index, 1);
+        setSafeMarkers(updatedMarkers);
+        await refreshZones();
       }
-
-      updatedMarkers.splice(index, 1);
-      setSafeMarkers(updatedMarkers);
-      await refreshZones(); // Refresh zones after deletion
 
     } else if (type === "dangerous") {
       updatedMarkers = [...dangerousMarkers];
       markerId = updatedMarkers[index]._id;
+      zoneId = updatedMarkers[index].zone;
 
-      // Delete marker from backend
-      try {
-        await axios.delete(`http://localhost:3001/dangermarkers/${markerId}`);
-      } catch (error) {
-        console.error(`Error deleting dangerous marker: ${error}`);
+      if (choice === "zone") {
+        // Delete whole zone
+        try {
+          await axios.delete(`http://localhost:3001/dangerzones/${zoneId}`);
+        } catch (error) {
+          console.error(`Error deleting dangerous zone: ${error}`);
+        }
+        setDangerousMarkers([]);
+        await refreshZones();
+      } else if (choice === "marker") {
+        // Delete marker
+        try {
+          await axios.delete(`http://localhost:3001/dangermarkers/${markerId}`);
+        } catch (error) {
+          console.error(`Error deleting dangerous marker: ${error}`);
+        }
+        updatedMarkers.splice(index, 1);
+        setDangerousMarkers(updatedMarkers);
+        await refreshZones();
       }
-
-      updatedMarkers.splice(index, 1);
-      setDangerousMarkers(updatedMarkers);
-      await refreshZones(); // Refresh zones after deletion
 
     } else if (type === "itinerary") {
       updatedMarkers = [...itineraryMarkers];
@@ -243,10 +316,77 @@ const MapPage = () => {
     }
   };
 
+  // Function to perform search based on the selected search type
+  const performSearch = async () => {
+    try {
+      let response;
+      if (searchType === "location") {
+        response = await axios.get('http://localhost:3001/mapbox/forward', {
+          params: {
+            q: searchQuery,
+            limit: 1,
+            access_token: process.env.MAPBOX_ACCESS_TOKEN,
+          },
+        });
+      } else {
+        const [longitude, latitude] = searchQuery.split(",");
+        response = await axios.get('http://localhost:3001/mapbox/reverse', {
+          params: {
+            longitude: longitude.trim(),
+            latitude: latitude.trim(),
+            limit: 1,
+            access_token: process.env.MAPBOX_ACCESS_TOKEN,
+          },
+        });
+      }
+
+      const result = response.data.features[0];
+      const [longitude, latitude] = result.center;
+      setYellowMarkerPosition([latitude, longitude]);
+      map.flyTo([latitude, longitude], 13);
+    } catch (error) {
+      console.error("Error performing search:", error);
+    }
+  };
+
+  // Function to handle mouseover event with delay
+  const handleMouseover = (e, marker) => {
+    hoverTimeout.current = setTimeout(async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+          params: {
+            longitude: marker.position[1],
+            latitude: marker.position[0],
+          },
+        });
+        const locationName = response.data.features[0]?.place_name || "Unknown location";
+        setHoveredMarker({
+          position: marker.position,
+          locationName,
+        });
+        L.popup()
+          .setLatLng(marker.position)
+          .setContent(locationName)
+          .openOn(e.target._map);
+      } catch (error) {
+        console.error("Error fetching location name:", error);
+      }
+    }, 2000); // 2 seconds delay
+  };
+
+  // Function to handle mouseout event
+  const handleMouseout = () => {
+    clearTimeout(hoverTimeout.current);
+    if (hoveredMarker) {
+      setHoveredMarker(null);
+      map.closePopup();
+    }
+  };
+
   // MapEvents component to handle map events
   const MapEvents = () => {
     useMapEvents({
-      click(e) {
+      async click(e) {
         if (!deleteButtonClicked) {
           let zoneType;
           if (activeAction === "addSafe") {
@@ -276,9 +416,17 @@ const MapPage = () => {
                 newMarker.description = description; // Store description directly in the marker if needed immediately
               }
 
-              const updatedMarkerList = [...markerList, newMarker];
-              setMarkers(updatedMarkerList);
-              updateGeoJsonLayer(updatedMarkerList, zoneType === "safe" ? setSafeGeoJsonLayers : setDangerousGeoJsonLayers, zoneType);
+              // Add marker to the database
+              const addedMarker = await addMarkerToDatabase(newMarker, zoneType);
+              if (addedMarker) {
+                newMarker._id = addedMarker._id; // Assign the ID from the database to the marker
+                newMarker.timestamp = addedMarker.timestamp; // Assign the timestamp from the database to the marker
+                if (zoneType === "dangerous") newMarker.exception = addedMarker.exception; // Assign the exception attribute for danger markers
+
+                const updatedMarkerList = [...markerList, newMarker];
+                setMarkers(updatedMarkerList);
+                updateGeoJsonLayer(updatedMarkerList, zoneType === "safe" ? setSafeGeoJsonLayers : setDangerousGeoJsonLayers, zoneType);
+              }
             }
           } else if (activeAction === "startItinerary") {
             if (itineraryMarkers.length < 2) {
@@ -315,6 +463,27 @@ const MapPage = () => {
     popupAnchor: [1, -34],
   });
 
+  const yellowIcon = new L.Icon({
+    iconUrl: yellowMarker,
+    iconSize: [25, 25],
+    iconAnchor: [12, 25],
+    popupAnchor: [1, -34],
+  });
+
+  // Function to show confirmation dialog
+  const showConfirmationDialog = (index, type) => {
+    setConfirmationDialog(
+      <ConfirmationDialog
+        message="Which component do you want to delete?"
+        onConfirm={choice => {
+          handleMarkerDelete(index, type, choice);
+          setConfirmationDialog(null);
+        }}
+        onCancel={() => setConfirmationDialog(null)}
+      />
+    );
+  };
+
   return (
     <div className="map-container">
       <div className="navbar" style={{ backgroundColor: "#378CE7" }}>
@@ -324,6 +493,21 @@ const MapPage = () => {
         <Link to="/aboutus" className="nav-link">
           About Us
         </Link>
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder={
+              searchType === "location" ? "Enter location name..." : "Enter coordinates (lng, lat)..."
+            }
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <option value="location">Search By Location Name</option>
+            <option value="coordinates">Search By Coordinates</option>
+          </select>
+          <button onClick={performSearch}>Search</button>
+        </div>
       </div>
       <div className="map-area">
         <MapContainer
@@ -331,6 +515,7 @@ const MapPage = () => {
           zoom={8}
           style={{ height: "100%", width: "100%" }}
           zoomControl={false}
+          whenCreated={setMap}
         >
           <ZoomControl position="topright" />
           <TileLayer
@@ -345,6 +530,10 @@ const MapPage = () => {
               key={`safe-${index}`}
               position={marker.position}
               icon={greenIcon}
+              eventHandlers={{
+                mouseover: (e) => handleMouseover(e, marker),
+                mouseout: handleMouseout,
+              }}
             >
               <Popup
                 onClose={() => setDeleteButtonClicked(false)}
@@ -355,7 +544,7 @@ const MapPage = () => {
                   description=""
                   backgroundColor="#E1F7F5"
                   position={marker.position}
-                  onDelete={() => handleMarkerDelete(index, "safe")}
+                  onDelete={() => showConfirmationDialog(index, "safe")}
                 />
               </Popup>
             </Marker>
@@ -366,6 +555,10 @@ const MapPage = () => {
               key={`dangerous-${index}`}
               position={marker.position}
               icon={redIcon}
+              eventHandlers={{
+                mouseover: (e) => handleMouseover(e, marker),
+                mouseout: handleMouseout,
+              }}
             >
               <Popup
                 onClose={() => setDeleteButtonClicked(false)}
@@ -380,7 +573,7 @@ const MapPage = () => {
                     ] || "No description provided"
                   }
                   position={marker.position}
-                  onDelete={() => handleMarkerDelete(index, "dangerous")}
+                  onDelete={() => showConfirmationDialog(index, "dangerous")}
                 />
               </Popup>
             </Marker>
@@ -401,11 +594,22 @@ const MapPage = () => {
                   backgroundColor="#E1F7F5"
                   description=""
                   position={marker.position}
-                  onDelete={() => handleMarkerDelete(index, "itinerary")}
+                  onDelete={() => showConfirmationDialog(index, "itinerary")}
                 />
               </Popup>
             </Marker>
           ))}
+          {/* Render yellow marker for search results */}
+          {yellowMarkerPosition && (
+            <Marker
+              position={yellowMarkerPosition}
+              icon={yellowIcon}
+            >
+              <Popup>
+                Search Result
+              </Popup>
+            </Marker>
+          )}
           {/* Render safe GeoJSON layers */}
           {safeGeoJsonLayers.map((layer, index) => (
             <GeoJSON
@@ -487,6 +691,7 @@ const MapPage = () => {
           </button>
         </div>
       </div>
+      {confirmationDialog}
     </div>
   );
 };
