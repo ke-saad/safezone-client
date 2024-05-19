@@ -4,11 +4,11 @@ import Login from './components/Login/Login';
 import Home from './components/Home/Home';
 import Aboutus from './components/Aboutus/Aboutus';
 import NotFound from './components/NotFound/NotFound';
-import ForgotPassword from './components/FrogotPassword/ForgotPassword';
+import ForgotPassword from './components/ForgotPassword/ForgotPassword';
 import MapPage from './components/MapPage/MapPage';
 import AdminDashboard from './components/AdminDashboard/AdminDashboard';
 import AccessDenied from './components/AccessDenied/AccessDenied';
-import UsersManagingPage from './components/UsersManaginfPage/UsersManagingPage';
+import UsersManagingPage from './components/UsersManagingPage/UsersManagingPage';
 import ViewAllUsers from './components/ViewAllUsers/ViewAllUsers';
 import UpdateViewAUser from './components/UpdateViewAUser/UpdateViewAUser';
 import UserInformation from './components/UserInformation/UserInformation';
@@ -21,6 +21,7 @@ import AddDangerZonePage from './components/AddDangerZonePage/AddDangerZonePage'
 import ViewAllDangerZones from './components/ViewAllDangerZones/ViewAllDangerZones';
 import ViewUpdateDangerZonePage from './components/ViewUpdateDangerZonePage/ViewUpdateDangerZonePage';
 import LocationInfoPage from './components/LocationInfoPage/LocationInfoPage';
+import ViewMarkerDetails from './components/ViewMarkerDetails/ViewMarkerDetails';
 
 function App() {
   return (
@@ -48,7 +49,8 @@ function App() {
         <Route path='/adddangerzone' element={<AddDangerZonePage />} />
         <Route path='/viewalldangerzones' element={<ViewAllDangerZones />} />
         <Route path='/viewupdatedangerzone/:id' element={<ViewUpdateDangerZonePage />} />
-        <Route path="/location/:lng/:lat" component={LocationInfoPage} />
+        <Route path="/location/:lng/:lat" element={<LocationInfoPage />} />
+        <Route path="/marker/:id" element={<ViewMarkerDetails />} />
       </Routes>
     </BrowserRouter>
   );

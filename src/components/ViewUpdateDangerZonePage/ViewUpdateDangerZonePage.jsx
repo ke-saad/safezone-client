@@ -41,12 +41,23 @@ const ViewUpdateDangerZone = () => {
     setMarkers(updatedMarkers);
   };
 
-  const addMarker = () => {
+  const addMarker = async () => {
     const lat = prompt("Enter Latitude:");
     const lng = prompt("Enter Longitude:");
     const description = prompt("Enter Description:");
     if (lat && lng && description) {
-      setMarkers([...markers, { coordinates: [parseFloat(lng), parseFloat(lat)], description }]);
+      try {
+        const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+          params: {
+            longitude: lng,
+            latitude: lat,
+          },
+        });
+        const placeName = response.data.features[0]?.place_name || "Unknown location";
+        setMarkers([...markers, { coordinates: [parseFloat(lng), parseFloat(lat)], description, place_name: placeName }]);
+      } catch (error) {
+        console.error("Error fetching location name:", error);
+      }
     }
   };
 
@@ -75,6 +86,7 @@ const ViewUpdateDangerZone = () => {
                     <th>Latitude</th>
                     <th>Longitude</th>
                     <th>Description</th>
+                    <th>Location</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -84,6 +96,7 @@ const ViewUpdateDangerZone = () => {
                       <td>{marker.coordinates[1]}</td>
                       <td>{marker.coordinates[0]}</td>
                       <td>{marker.description}</td>
+                      <td>{marker.place_name || "Unknown location"}</td>
                       <td>
                         <button type="button" className="remove-button" onClick={() => removeMarker(index)}>Remove</button>
                       </td>

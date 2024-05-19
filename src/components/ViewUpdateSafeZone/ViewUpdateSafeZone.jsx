@@ -26,9 +26,7 @@ const ViewUpdateSafeZone = () => {
     e.preventDefault();
 
     try {
-      await axios.put(`http://localhost:3001/safezones/${id}`, {
-        markers
-      });
+      await axios.put(`http://localhost:3001/safezones/${id}`, { markers });
       setMessage("Safe zone updated successfully.");
       navigate("/viewallsafezones");
     } catch (error) {
@@ -43,11 +41,22 @@ const ViewUpdateSafeZone = () => {
     setMarkers(updatedMarkers);
   };
 
-  const addMarker = () => {
+  const addMarker = async () => {
     const lat = prompt("Enter Latitude:");
     const lng = prompt("Enter Longitude:");
     if (lat && lng) {
-      setMarkers([...markers, { coordinates: [parseFloat(lng), parseFloat(lat)] }]);
+      try {
+        const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+          params: {
+            longitude: lng,
+            latitude: lat,
+          },
+        });
+        const placeName = response.data.features[0]?.place_name || "Unknown location";
+        setMarkers([...markers, { coordinates: [parseFloat(lng), parseFloat(lat)], place_name: placeName }]);
+      } catch (error) {
+        console.error("Error fetching location name:", error);
+      }
     }
   };
 
@@ -60,7 +69,7 @@ const ViewUpdateSafeZone = () => {
       <div className="navbar">
         <Link to="/" className="nav-link">Home</Link>
         <Link to="/admindashboard" className="nav-link">Dashboard</Link>
-        <Link to="/aboutus" class="nav-link">About Us</Link>
+        <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
       <div className="background-overlay"></div>
       <div className="content">
@@ -75,6 +84,7 @@ const ViewUpdateSafeZone = () => {
                   <tr>
                     <th>Latitude</th>
                     <th>Longitude</th>
+                    <th>Location</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -83,6 +93,7 @@ const ViewUpdateSafeZone = () => {
                     <tr key={index}>
                       <td>{marker.coordinates[1]}</td>
                       <td>{marker.coordinates[0]}</td>
+                      <td>{marker.place_name || "Unknown location"}</td>
                       <td>
                         <button type="button" className="remove-button" onClick={() => removeMarker(index)}>Remove</button>
                       </td>

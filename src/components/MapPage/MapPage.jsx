@@ -39,7 +39,7 @@ const PopupContent = ({ title, description, locationName, onDelete, position }) 
       <p>Description: {description}</p>
     )}
     <button className="view-button">
-      <Link to={`/location/${position[1]}/${position[0]}`}>View</Link>
+      <Link to={`/marker/${position[1]},${position[0]}`}>View</Link>
     </button>
     <button className="delete-button" onClick={onDelete}>Delete</button>
   </div>
@@ -85,16 +85,25 @@ const MapPage = () => {
     const endpoint = zoneType === "dangerous"
       ? "http://localhost:3001/dangermarkers/add"
       : "http://localhost:3001/safetymarkers/add";
-      
+
+    // Perform forward geocoding to get full information about the marker's location
+    const geocodeResponse = await axios.get('http://localhost:3001/mapbox/forward', {
+      params: { q: `${marker.position[1]},${marker.position[0]}`, limit: 1 },
+    });
+
+    const geocodeData = geocodeResponse.data.features[0] || {};
+
     const payload = {
       coordinates: marker.position,
       description: marker.description || "",
       timestamp: new Date().toISOString(),
+      place_name: geocodeData.place_name || "Unknown location",
+      context: geocodeData.context || [], // Store the context array from the geocode response
       ...(zoneType === "dangerous" && { exception: marker.exception || "" }) // Include exception attribute for danger markers
     };
-  
+
     console.log('Sending payload:', JSON.stringify(payload, null, 2)); // Log the payload
-  
+
     try {
       const response = await axios.post(endpoint, payload);
       return response.data; // return the newly created marker data
@@ -104,7 +113,7 @@ const MapPage = () => {
     }
   };
 
-  // Function to update GeoJSON layers
+  // Function to update GeoJSON layers and store zone data with forward geocoding for markers
   const updateGeoJsonLayer = async (markers, setLayerFunc, zoneType) => {
     if (markers.length >= 10 && markers.length % 10 === 0) {
       // Extract the last 10 markers
@@ -130,6 +139,20 @@ const MapPage = () => {
         setLayerFunc(layers => [...layers, hull]);
       }
 
+      // Perform forward geocoding for each marker to get full information
+      const updatedMarkers = await Promise.all(lastTenMarkers.map(async marker => {
+        const geocodeResponse = await axios.get('http://localhost:3001/mapbox/forward', {
+          params: { q: `${marker.position[1]},${marker.position[0]}`, limit: 1 },
+        });
+
+        const geocodeData = geocodeResponse.data.features[0] || {};
+        return {
+          ...marker,
+          place_name: geocodeData.place_name || "Unknown location",
+          context: geocodeData.context || [], // Store the context array from the geocode response
+        };
+      }));
+
       // Determine endpoint
       const endpoint =
         zoneType === "dangerous"
@@ -138,10 +161,12 @@ const MapPage = () => {
 
       // Format payload according to the zone type
       const payload = {
-        markers: lastTenMarkers.map(marker => ({
+        markers: updatedMarkers.map(marker => ({
           coordinates: marker.position,
           description: marker.description || "",
           timestamp: marker.timestamp,
+          place_name: marker.place_name,
+          context: marker.context,
           ...(zoneType === "dangerous" && { exception: marker.exception || "" }) // Include exception attribute for danger markers
         })),
       };
@@ -330,19 +355,22 @@ const MapPage = () => {
     setDeleteButtonClicked(false);
   };
 
-  // Function to handle zone deletion by deleting its markers
+  // Function to delete all markers in a zone
   const handleZoneDelete = async (zoneId, zoneType) => {
-    const markersToDelete = zoneType === 'safe'
-      ? safeMarkers.filter(marker => marker.zone._id === zoneId)
-      : dangerousMarkers.filter(marker => marker.zone._id === zoneId);
-
     try {
-      for (const marker of markersToDelete) {
-        await axios.delete(`http://localhost:3001/${zoneType === 'safe' ? 'safetymarkers' : 'dangermarkers'}/${marker._id}`);
+      // Fetch all markers for the zone
+      const markersResponse = await axios.get(`http://localhost:3001/${zoneType}zones/${zoneId}`);
+      const markers = markersResponse.data.markers;
+
+      // Delete each marker
+      for (const marker of markers) {
+        await axios.delete(`http://localhost:3001/${zoneType}markers/${marker._id}`);
       }
+
+      // Refresh zones after deletion
       await refreshZones();
     } catch (error) {
-      console.error(`Error deleting markers for ${zoneType} zone: ${error}`);
+      console.error(`Error deleting markers for ${zoneType} zone:`, error);
     }
   };
 
@@ -469,7 +497,7 @@ const MapPage = () => {
         message={`What would you like to do with this ${zoneType} zone?`}
         onConfirm={async (choice) => {
           if (choice === "delete") {
-            // Delete the whole zone by deleting its markers
+            // Delete all markers in the zone
             await handleZoneDelete(zoneId, zoneType);
           } else if (choice === "view") {
             // Fetch the zone ID from the database and navigate to the view page
@@ -785,40 +813,41 @@ const MapPage = () => {
           )}
           {/* Render safe GeoJSON layers */}
           {safeGeoJsonLayers.map((layer, index) => (
-            <GeoJSON
-              key={`safe-layer-${index}`}
-              data={layer}
-              style={{
-                color: "#00FF00",
-                weight: 2,
-                opacity: 0.35,
-                fillOpacity: 0.5,
-              }}
-              eventHandlers={{
-                mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'safe' } } }),
-                mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'safe' } } }),
-                click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer.properties.zoneId, zoneType: 'safe' } } })
-              }}
-            />
-          ))}
-          {/* Render dangerous GeoJSON layers */}
-          {dangerousGeoJsonLayers.map((layer, index) => (
-            <GeoJSON
-              key={`dangerous-layer-${index}`}
-              data={layer}
-              style={{
-                color: "#FF0000",
-                weight: 2,
-                opacity: 0.35,
-                fillOpacity: 0.5,
-              }}
-              eventHandlers={{
-                mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'dangerous' } } }),
-                mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'dangerous' } } }),
-                click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer.properties.zoneId, zoneType: 'dangerous' } } })
-              }}
-            />
-          ))}
+  <GeoJSON
+    key={`safe-layer-${index}`}
+    data={layer}
+    style={{
+      color: "#00FF00",
+      weight: 2,
+      opacity: 0.8,  // Adjust opacity here
+      fillOpacity: 0.4,  // Adjust fillOpacity here
+    }}
+    eventHandlers={{
+      mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'safe' } } }),
+      mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'safe' } } }),
+      click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer.properties.zoneId, zoneType: 'safe' } } })
+    }}
+  />
+))}
+
+{dangerousGeoJsonLayers.map((layer, index) => (
+  <GeoJSON
+    key={`dangerous-layer-${index}`}
+    data={layer}
+    style={{
+      color: "#FF0000",
+      weight: 2,
+      opacity: 0.8,  // Adjust opacity here
+      fillOpacity: 0.4,  // Adjust fillOpacity here
+    }}
+    eventHandlers={{
+      mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'dangerous' } } }),
+      mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'dangerous' } } }),
+      click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer.properties.zoneId, zoneType: 'dangerous' } } })
+    }}
+  />
+))}
+
         </MapContainer>
         {/* Render message if any */}
         {message && (
