@@ -103,6 +103,7 @@ const MapPage = () => {
   const [hoveredMarker, setHoveredMarker] = useState(null); // To handle the popup
   const [selectedLayer, setSelectedLayer] = useState(null); // To handle selected GeoJSON layer
   const [zones, setZones] = useState([]); // To store all zone information
+  const [completedZones, setCompletedZones] = useState([]); // To track completed zones
 
   // Function to add marker to the database
   const addMarkerToDatabase = async (marker, zoneType) => {
@@ -142,21 +143,21 @@ const MapPage = () => {
     if (markers.length >= 10 && markers.length % 10 === 0) {
       // Extract the last 10 markers
       const lastTenMarkers = markers.slice(-10);
-  
+
       // Calculate the convex hull (if needed)
       const points = lastTenMarkers.map((marker) =>
         turf.point([marker.position[1], marker.position[0]])
       );
       const featureCollection = turf.featureCollection(points);
       const hull = turf.convex(featureCollection);
-  
+
       // Perform forward geocoding for each marker to get full information
       const updatedMarkers = await Promise.all(
         lastTenMarkers.map(async (marker) => {
           const geocodeResponse = await axios.get("http://localhost:3001/mapbox/forward", {
             params: { q: `${marker.position[1]},${marker.position[0]}`, limit: 1 },
           });
-  
+
           const geocodeData = geocodeResponse.data.features[0] || {};
           return {
             ...marker,
@@ -165,13 +166,13 @@ const MapPage = () => {
           };
         })
       );
-  
+
       // Determine endpoint
       const endpoint =
         zoneType === "dangerous"
           ? "http://localhost:3001/dangerzones/add"
           : "http://localhost:3001/safezones/add";
-  
+
       // Format payload according to the zone type
       const payload = {
         markers: updatedMarkers.map((marker) => ({
@@ -183,26 +184,26 @@ const MapPage = () => {
           ...(zoneType === "dangerous" && { exception: marker.exception || "" }), // Include exception attribute for danger markers
         })),
       };
-  
+
       // Make the Axios POST request
       try {
         const response = await axios.post(endpoint, payload);
         const createdZone = response.data.data.zone;
-  
+
         if (hull && createdZone._id) {
           hull.properties = { zoneType, zoneId: createdZone._id }; // Add properties to the GeoJSON feature
           setLayerFunc((layers) => [...layers, hull]);
+          setCompletedZones((prev) => [...prev, createdZone._id]); // Mark the zone as completed
         } else {
           console.error("Hull or created zone ID is missing.");
         }
-  
+
         console.log(`${zoneType} zones added to the database:`, response.data);
       } catch (error) {
         console.error(`Error adding ${zoneType} zones to the database:`, error);
       }
     }
   };
-  
 
   // Function to fetch safe zones from the server
   const fetchSafeZones = async () => {
@@ -431,6 +432,9 @@ const MapPage = () => {
         await axios.delete(`http://localhost:3001/${zoneType}markers/${marker._id}`);
       }
 
+      // Remove the zone from completed zones
+      setCompletedZones((prev) => prev.filter((id) => id !== zoneId));
+
       // Refresh zones after deletion
       await refreshZones();
     } catch (error) {
@@ -470,7 +474,7 @@ const MapPage = () => {
       }
 
       const result = response.data.features[0];
-      const [longitudeResult, latitudeResult] = result.geometry.coordinates;
+      const [latitudeResult, longitudeResult] = result.geometry.coordinates;
 
       // Remove previous yellow marker
       setYellowMarkerPosition(null);
@@ -605,6 +609,13 @@ const MapPage = () => {
               activeAction === "addSafe" ? setSafeMarkers : setDangerousMarkers;
 
             if (!markerList.some((marker) => marker.position[0] === lat && marker.position[1] === lng)) {
+              // Check if this marker can be added to the zone
+              const currentZoneId = zones.find(zone => zone.markers.some(marker => marker.coordinates[0] === lat && marker.coordinates[1] === lng))?._id;
+              if (currentZoneId && completedZones.includes(currentZoneId)) {
+                console.error("Cannot add marker to a completed zone.");
+                return; // Exit if trying to add a marker to a completed zone
+              }
+
               if (activeAction === "addDangerous") {
                 const description = prompt("Enter description for the dangerous location:");
                 if (description === null || description.trim() === "") {
@@ -730,8 +741,8 @@ const MapPage = () => {
       <div className="navbar">
         <div className="search-container">
           <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
-            <option value="forward">Forward Search</option>
-            <option value="reverse">Reverse Search</option>
+            <option value="forward">Location Name</option>
+            <option value="reverse">Location Coordinates</option>
           </select>
           {searchType === "forward" ? (
             <input
