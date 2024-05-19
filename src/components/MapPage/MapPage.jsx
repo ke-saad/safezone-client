@@ -29,21 +29,45 @@ import addDangerousIcon from "../Images/danger_location_icon.png";
 import calculateItineraryIcon from "../Images/calculate_itinerary_icon.png";
 
 // Define Popup content component
-const PopupContent = ({ title, description, locationName, onDelete, position }) => (
-  <div>
-    <h3>{title}</h3>
-    <p>Location Name: {locationName}</p>
-    {title === "Danger" ? (
-      <p>Danger Description: {description}</p>
-    ) : (
-      <p>Description: {description}</p>
-    )}
-    <button className="view-button">
-      <Link to={`/marker/${position[1]},${position[0]}`}>View</Link>
-    </button>
-    <button className="delete-button" onClick={onDelete}>Delete</button>
-  </div>
-);
+const PopupContent = ({ title, description, position, onDelete }) => {
+  const [locationName, setLocationName] = useState('Loading...');
+
+  useEffect(() => {
+    const fetchLocationName = async () => {
+      try {
+        const [latitude, longitude] = position; // Use correct order: [latitude, longitude]
+        const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+          params: { longitude, latitude } // Use correct params
+        });
+        const data = response.data.features[0];
+        setLocationName(data ? data.place_name : 'Unknown location');
+      } catch (error) {
+        console.error('Error fetching location name:', error);
+        setLocationName('Unknown location');
+      }
+    };
+
+    fetchLocationName();
+  }, [position]);
+
+  return (
+    <div>
+      <h3>{title}</h3>
+      <p>Location Name: {locationName}</p><br />
+      {title === "Danger" ? (
+        <p>Danger: {description}</p>
+      ) : (
+        <p>{description}</p>
+      )}
+      <br /><button className="view-button">
+        <Link to={`/marker/${position[0]},${position[1]}`}>View</Link> {/* Ensure order is correct */}
+      </button>
+      <button className="delete-button" onClick={onDelete}>Delete</button>
+    </div>
+  );
+};
+
+
 
 // Custom confirmation dialog component
 const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
