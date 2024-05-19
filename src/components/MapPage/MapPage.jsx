@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MapContainer,
   TileLayer,
@@ -29,17 +29,21 @@ import addDangerousIcon from "../Images/danger_location_icon.png";
 import calculateItineraryIcon from "../Images/calculate_itinerary_icon.png";
 
 // Define Popup content component
-const PopupContent = ({ title, description, position, onDelete, locationName }) => (
+const PopupContent = ({ title, description, locationName, onDelete, position }) => (
   <div>
     <h3>{title}</h3>
     {title === "Danger" ? (
-      <p>{`Danger: ${description}`}</p>
+      <>
+        <p>Location Name: {locationName}</p>
+        <p>Danger Description: {description}</p>
+      </>
     ) : (
-      <p>{description}</p>
+      <p>Location Name: {locationName}</p>
     )}
-    <p>{locationName ? locationName : `(${position[1]}, ${position[0]})`}</p>
-    <Link to={`/location/${position[1]}/${position[0]}`}>View full location information</Link>
-    <button onClick={onDelete}>Delete</button>
+    <button className="view-button">
+      <Link to={`/location/${position[1]}/${position[0]}`}>View</Link>
+    </button>
+    <button className="delete-button" onClick={onDelete}>Delete</button>
   </div>
 );
 
@@ -47,15 +51,15 @@ const PopupContent = ({ title, description, position, onDelete, locationName }) 
 const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
   <div className="confirmation-dialog">
     <p>{message}</p>
-    <button onClick={() => onConfirm("marker")}>The Marker Only</button>
-    <button onClick={() => onConfirm("zone")}>The Whole Zone</button>
+    <button onClick={() => onConfirm("view")}>View</button>
+    <button onClick={() => onConfirm("delete")}>Delete</button>
     <button onClick={onCancel}>Cancel</button>
   </div>
 );
 
 // Main MapPage component
 const MapPage = () => {
-  // State variables
+  const navigate = useNavigate(); // To navigate to different pages
   const [safeMarkers, setSafeMarkers] = useState([]);
   const [dangerousMarkers, setDangerousMarkers] = useState([]);
   const [itineraryMarkers, setItineraryMarkers] = useState([]);
@@ -67,11 +71,15 @@ const MapPage = () => {
   const [deleteButtonClicked, setDeleteButtonClicked] = useState(false);
   const [confirmationDialog, setConfirmationDialog] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchType, setSearchType] = useState("location");
+  const [searchType, setSearchType] = useState("forward"); // State for search type
+  const [longitude, setLongitude] = useState(""); // State for longitude
+  const [latitude, setLatitude] = useState(""); // State for latitude
   const [yellowMarkerPosition, setYellowMarkerPosition] = useState(null);
+  const [yellowMarkerInfo, setYellowMarkerInfo] = useState(null);
   const [map, setMap] = useState(null);
   const hoverTimeout = useRef(null); // To handle hover delay
   const [hoveredMarker, setHoveredMarker] = useState(null); // To handle the popup
+  const [selectedLayer, setSelectedLayer] = useState(null); // To handle selected GeoJSON layer
 
   // Function to add marker to the database
   const addMarkerToDatabase = async (marker, zoneType) => {
@@ -161,7 +169,8 @@ const MapPage = () => {
           position: marker.coordinates,
           _id: marker._id,
           zone: zone._id, // Store the parent zone ID in the marker
-          timestamp: marker.timestamp
+          timestamp: marker.timestamp,
+          locationName: zone.locationName // Store the location name
         })));
       }, []);
       setSafeMarkers(existingMarkers => [...existingMarkers, ...safeMarkersFromZones]);
@@ -194,6 +203,7 @@ const MapPage = () => {
           _id: marker._id,
           zone: zone._id, // Store the parent zone ID in the marker
           timestamp: marker.timestamp,
+          locationName: zone.locationName, // Store the location name
           exception: marker.exception || "" // Store the exception attribute for danger markers
         })));
       }, []);
@@ -238,7 +248,7 @@ const MapPage = () => {
   };
 
   // Function to handle marker deletion
-  const handleMarkerDelete = async (index, type, choice) => {
+  const handleMarkerDelete = async (index, type) => {
     setDeleteButtonClicked(true);
     let updatedMarkers = [];
     let markerId;
@@ -249,55 +259,42 @@ const MapPage = () => {
       markerId = updatedMarkers[index]._id;
       zoneId = updatedMarkers[index].zone;
 
-      if (choice === "zone") {
-        // Delete whole zone
-        try {
-          await axios.delete(`http://localhost:3001/safezones/${zoneId}`);
-        } catch (error) {
-          console.error(`Error deleting safe zone: ${error}`);
-        }
-        setSafeMarkers([]);
-        await refreshZones();
-      } else if (choice === "marker") {
-        // Delete marker
-        try {
-          await axios.delete(`http://localhost:3001/safetymarkers/${markerId}`);
-        } catch (error) {
-          console.error(`Error deleting safe marker: ${error}`);
-        }
-        updatedMarkers.splice(index, 1);
-        setSafeMarkers(updatedMarkers);
-        await refreshZones();
+      // Delete marker
+      try {
+        await axios.delete(`http://localhost:3001/safetymarkers/${markerId}`);
+      } catch (error) {
+        console.error(`Error deleting safe marker: ${error}`);
       }
+      updatedMarkers.splice(index, 1);
+      setSafeMarkers(updatedMarkers);
+      await refreshZones();
 
     } else if (type === "dangerous") {
       updatedMarkers = [...dangerousMarkers];
       markerId = updatedMarkers[index]._id;
       zoneId = updatedMarkers[index].zone;
 
-      if (choice === "zone") {
-        // Delete whole zone
-        try {
-          await axios.delete(`http://localhost:3001/dangerzones/${zoneId}`);
-        } catch (error) {
-          console.error(`Error deleting dangerous zone: ${error}`);
-        }
-        setDangerousMarkers([]);
-        await refreshZones();
-      } else if (choice === "marker") {
-        // Delete marker
-        try {
-          await axios.delete(`http://localhost:3001/dangermarkers/${markerId}`);
-        } catch (error) {
-          console.error(`Error deleting dangerous marker: ${error}`);
-        }
-        updatedMarkers.splice(index, 1);
-        setDangerousMarkers(updatedMarkers);
-        await refreshZones();
+      // Delete marker
+      try {
+        await axios.delete(`http://localhost:3001/dangermarkers/${markerId}`);
+      } catch (error) {
+        console.error(`Error deleting dangerous marker: ${error}`);
       }
+      updatedMarkers.splice(index, 1);
+      setDangerousMarkers(updatedMarkers);
+      await refreshZones();
 
     } else if (type === "itinerary") {
       updatedMarkers = [...itineraryMarkers];
+      markerId = updatedMarkers[index]._id;
+      zoneId = updatedMarkers[index].zone;
+
+      // Delete marker
+      try {
+        await axios.delete(`http://localhost:3001/itinerarymarkers/${markerId}`);
+      } catch (error) {
+        console.error(`Error deleting itinerary marker: ${error}`);
+      }
       updatedMarkers.splice(index, 1);
       setItineraryMarkers(updatedMarkers);
     }
@@ -316,34 +313,52 @@ const MapPage = () => {
     }
   };
 
-  // Function to perform search based on the selected search type
+  // Function to perform search
   const performSearch = async () => {
     try {
-      let response;
-      if (searchType === "location") {
-        response = await axios.get('http://localhost:3001/mapbox/forward', {
-          params: {
-            q: searchQuery,
-            limit: 1,
-            access_token: process.env.MAPBOX_ACCESS_TOKEN,
-          },
-        });
-      } else {
-        const [longitude, latitude] = searchQuery.split(",");
-        response = await axios.get('http://localhost:3001/mapbox/reverse', {
-          params: {
-            longitude: longitude.trim(),
-            latitude: latitude.trim(),
-            limit: 1,
-            access_token: process.env.MAPBOX_ACCESS_TOKEN,
-          },
-        });
+      const endpoint =
+        searchType === "forward"
+          ? "http://localhost:3001/mapbox/forward"
+          : "http://localhost:3001/mapbox/reverse-geocode";
+
+      const params = searchType === "forward"
+        ? { q: searchQuery, limit: 1 }
+        : { longitude: longitude, latitude: latitude };
+
+      const response = await axios.get(endpoint, { params });
+
+      if (response.data.features.length === 0) {
+        setMessage("No results found");
+        return;
       }
 
       const result = response.data.features[0];
-      const [longitude, latitude] = result.center;
-      setYellowMarkerPosition([latitude, longitude]);
-      map.flyTo([latitude, longitude], 13);
+      const [longitudeResult, latitudeResult] = result.geometry.coordinates;
+
+      // Remove previous yellow marker
+      setYellowMarkerPosition(null);
+
+      // Set new yellow marker
+      setYellowMarkerPosition([latitudeResult, longitudeResult]);
+
+      // Fetch the location name
+      try {
+        const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+          params: {
+            longitude: longitudeResult,
+            latitude: latitudeResult,
+          },
+        });
+        const locationName = response.data.features[0]?.place_name || "Unknown location";
+        setYellowMarkerInfo({ locationName });
+
+        // Check if map is defined before using flyTo
+        if (map) {
+          map.flyTo([latitudeResult, longitudeResult], 13);
+        }
+      } catch (error) {
+        console.error("Error fetching location name:", error);
+      }
     } catch (error) {
       console.error("Error performing search:", error);
     }
@@ -381,6 +396,51 @@ const MapPage = () => {
       setHoveredMarker(null);
       map.closePopup();
     }
+  };
+
+  // Function to handle GeoJSON layer mouseover event
+  const handleLayerMouseover = (e, layer) => {
+    e.target.setStyle({
+      color: layer.feature.properties.zoneType === "safe" ? "#006400" : "#8B0000",
+    });
+  };
+
+  // Function to handle GeoJSON layer mouseout event
+  const handleLayerMouseout = (e, layer) => {
+    e.target.setStyle({
+      color: layer.feature.properties.zoneType === "safe" ? "#00FF00" : "#FF0000",
+    });
+  };
+
+  // Function to handle GeoJSON layer click event
+  const handleLayerClick = (e, layer) => {
+    const zoneId = layer.feature.properties.zoneId;
+    const zoneType = layer.feature.properties.zoneType;
+    setSelectedLayer({ zoneId, zoneType, latlng: e.latlng });
+  };
+
+  // Function to show GeoJSON layer confirmation dialog
+  const showLayerConfirmationDialog = () => {
+    const { zoneId, zoneType, latlng } = selectedLayer;
+    return (
+      <ConfirmationDialog
+        message={`What would you like to do with this ${zoneType} zone?`}
+        onConfirm={(choice) => {
+          if (choice === "delete") {
+            // Delete the whole zone
+            axios.delete(`http://localhost:3001/${zoneType}zones/${zoneId}`).then(() => {
+              refreshZones();
+            });
+          } else if (choice === "view") {
+            // Navigate to the appropriate page
+            const viewPage = zoneType === "safe" ? "viewupdatesafezone" : "viewupdatedangerzone";
+            navigate(`/${viewPage}/${zoneId}`);
+          }
+          setSelectedLayer(null);
+        }}
+        onCancel={() => setSelectedLayer(null)}
+      />
+    );
   };
 
   // MapEvents component to handle map events
@@ -424,14 +484,45 @@ const MapPage = () => {
                 if (zoneType === "dangerous") newMarker.exception = addedMarker.exception; // Assign the exception attribute for danger markers
 
                 const updatedMarkerList = [...markerList, newMarker];
-                setMarkers(updatedMarkerList);
-                updateGeoJsonLayer(updatedMarkerList, zoneType === "safe" ? setSafeGeoJsonLayers : setDangerousGeoJsonLayers, zoneType);
+
+                // Fetch the location name
+                try {
+                  const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+                    params: {
+                      longitude: lng,
+                      latitude: lat,
+                    },
+                  });
+                  const locationName = response.data.features[0]?.place_name || "Unknown location";
+                  newMarker.locationName = locationName;
+
+                  setMarkers(updatedMarkerList);
+                  updateGeoJsonLayer(updatedMarkerList, zoneType === "safe" ? setSafeGeoJsonLayers : setDangerousGeoJsonLayers, zoneType);
+                } catch (error) {
+                  console.error("Error fetching location name:", error);
+                }
               }
             }
           } else if (activeAction === "startItinerary") {
             if (itineraryMarkers.length < 2) {
               const { lat, lng } = e.latlng;
-              setItineraryMarkers(prev => [...prev, { position: [lat, lng] }]);
+              const newMarker = { position: [lat, lng] };
+
+              // Fetch the location name
+              try {
+                const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+                  params: {
+                    longitude: lng,
+                    latitude: lat,
+                  },
+                });
+                const locationName = response.data.features[0]?.place_name || "Unknown location";
+                newMarker.locationName = locationName;
+
+                setItineraryMarkers(prev => [...prev, newMarker]);
+              } catch (error) {
+                console.error("Error fetching location name:", error);
+              }
             }
           }
         }
@@ -474,9 +565,14 @@ const MapPage = () => {
   const showConfirmationDialog = (index, type) => {
     setConfirmationDialog(
       <ConfirmationDialog
-        message="Which component do you want to delete?"
+        message="What would you like to do with this marker?"
         onConfirm={choice => {
-          handleMarkerDelete(index, type, choice);
+          if (choice === "delete") {
+            handleMarkerDelete(index, type);
+          } else if (choice === "view") {
+            const viewPage = type === "safe" ? "viewupdatesafezone" : "viewupdatedangerzone";
+            navigate(`/${viewPage}/${index}`);
+          }
           setConfirmationDialog(null);
         }}
         onCancel={() => setConfirmationDialog(null)}
@@ -486,28 +582,43 @@ const MapPage = () => {
 
   return (
     <div className="map-container">
-      <div className="navbar" style={{ backgroundColor: "#378CE7" }}>
+      <div className="navbar">
+        <div className="search-container">
+          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <option value="forward">Forward Search</option>
+            <option value="reverse">Reverse Search</option>
+          </select>
+          {searchType === "forward" ? (
+            <input
+              type="text"
+              placeholder="Enter location name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          ) : (
+            <>
+              <input
+                type="text"
+                placeholder="Enter longitude..."
+                value={longitude}
+                onChange={(e) => setLongitude(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Enter latitude..."
+                value={latitude}
+                onChange={(e) => setLatitude(e.target.value)}
+              />
+            </>
+          )}
+          <button onClick={performSearch}>Search</button>
+        </div>
         <Link to="/" className="nav-link">
           Home
         </Link>
         <Link to="/aboutus" className="nav-link">
           About Us
         </Link>
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder={
-              searchType === "location" ? "Enter location name..." : "Enter coordinates (lng, lat)..."
-            }
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
-            <option value="location">Search By Location Name</option>
-            <option value="coordinates">Search By Coordinates</option>
-          </select>
-          <button onClick={performSearch}>Search</button>
-        </div>
       </div>
       <div className="map-area">
         <MapContainer
@@ -542,7 +653,7 @@ const MapPage = () => {
                 <PopupContent
                   title="Safe location"
                   description=""
-                  backgroundColor="#E1F7F5"
+                  locationName={marker.locationName}
                   position={marker.position}
                   onDelete={() => showConfirmationDialog(index, "safe")}
                 />
@@ -566,7 +677,7 @@ const MapPage = () => {
               >
                 <PopupContent
                   title="Danger"
-                  backgroundColor="#E1F7F5"
+                  locationName={marker.locationName}
                   description={
                     dangerousDescriptions[
                       `${marker.position[0]},${marker.position[1]}`
@@ -591,10 +702,10 @@ const MapPage = () => {
               >
                 <PopupContent
                   title="Itinerary point"
-                  backgroundColor="#E1F7F5"
                   description=""
+                  locationName={marker.locationName}
                   position={marker.position}
-                  onDelete={() => showConfirmationDialog(index, "itinerary")}
+                  onDelete={() => handleMarkerDelete(index, "itinerary")}
                 />
               </Popup>
             </Marker>
@@ -604,9 +715,22 @@ const MapPage = () => {
             <Marker
               position={yellowMarkerPosition}
               icon={yellowIcon}
+              eventHandlers={{
+                mouseover: (e) => handleMouseover(e, { position: yellowMarkerPosition }),
+                mouseout: handleMouseout,
+              }}
             >
-              <Popup>
-                Search Result
+              <Popup
+                onClose={() => setDeleteButtonClicked(false)}
+                onOpen={() => setDeleteButtonClicked(false)}
+              >
+                <PopupContent
+                  title="Search Result"
+                  description=""
+                  locationName={yellowMarkerInfo?.locationName || "Unknown location"}
+                  position={yellowMarkerPosition}
+                  onDelete={() => setYellowMarkerPosition(null)}
+                />
               </Popup>
             </Marker>
           )}
@@ -621,6 +745,11 @@ const MapPage = () => {
                 opacity: 0.35,
                 fillOpacity: 0.5,
               }}
+              eventHandlers={{
+                mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'safe' } } }),
+                mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'safe' } } }),
+                click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer._id, zoneType: 'safe' } } })
+              }}
             />
           ))}
           {/* Render dangerous GeoJSON layers */}
@@ -633,6 +762,11 @@ const MapPage = () => {
                 weight: 2,
                 opacity: 0.35,
                 fillOpacity: 0.5,
+              }}
+              eventHandlers={{
+                mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'dangerous' } } }),
+                mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'dangerous' } } }),
+                click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer._id, zoneType: 'dangerous' } } })
               }}
             />
           ))}
@@ -692,6 +826,7 @@ const MapPage = () => {
         </div>
       </div>
       {confirmationDialog}
+      {selectedLayer && showLayerConfirmationDialog()}
     </div>
   );
 };
