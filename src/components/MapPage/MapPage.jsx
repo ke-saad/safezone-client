@@ -32,13 +32,11 @@ import calculateItineraryIcon from "../Images/calculate_itinerary_icon.png";
 const PopupContent = ({ title, description, locationName, onDelete, position }) => (
   <div>
     <h3>{title}</h3>
+    <p>Location Name: {locationName}</p>
     {title === "Danger" ? (
-      <>
-        <p>Location Name: {locationName}</p>
-        <p>Danger Description: {description}</p>
-      </>
+      <p>Danger Description: {description}</p>
     ) : (
-      <p>Location Name: {locationName}</p>
+      <p>Description: {description}</p>
     )}
     <button className="view-button">
       <Link to={`/location/${position[1]}/${position[0]}`}>View</Link>
@@ -80,20 +78,23 @@ const MapPage = () => {
   const hoverTimeout = useRef(null); // To handle hover delay
   const [hoveredMarker, setHoveredMarker] = useState(null); // To handle the popup
   const [selectedLayer, setSelectedLayer] = useState(null); // To handle selected GeoJSON layer
+  const [zones, setZones] = useState([]); // To store all zone information
 
   // Function to add marker to the database
   const addMarkerToDatabase = async (marker, zoneType) => {
     const endpoint = zoneType === "dangerous"
       ? "http://localhost:3001/dangermarkers/add"
       : "http://localhost:3001/safetymarkers/add";
-    
+      
     const payload = {
       coordinates: marker.position,
       description: marker.description || "",
       timestamp: new Date().toISOString(),
       ...(zoneType === "dangerous" && { exception: marker.exception || "" }) // Include exception attribute for danger markers
     };
-
+  
+    console.log('Sending payload:', JSON.stringify(payload, null, 2)); // Log the payload
+  
     try {
       const response = await axios.post(endpoint, payload);
       return response.data; // return the newly created marker data
@@ -125,6 +126,7 @@ const MapPage = () => {
       const hull = turf.convex(featureCollection);
 
       if (hull) {
+        hull.properties = { zoneType }; // Add properties to the GeoJSON feature
         setLayerFunc(layers => [...layers, hull]);
       }
 
@@ -141,15 +143,12 @@ const MapPage = () => {
           description: marker.description || "",
           timestamp: marker.timestamp,
           ...(zoneType === "dangerous" && { exception: marker.exception || "" }) // Include exception attribute for danger markers
-        }))
+        })),
       };
 
       // Make the Axios POST request
       try {
         const response = await axios.post(endpoint, payload);
-        // Ensure markers get the zone ID
-        const zoneId = response.data._id;
-        lastTenMarkers.forEach(marker => marker.zone = zoneId);
         console.log(`${zoneType} zones added to the database:`, response.data);
       } catch (error) {
         console.error(`Error adding ${zoneType} zones to the database:`, error);
@@ -163,24 +162,43 @@ const MapPage = () => {
       const response = await axios.get("http://localhost:3001/safezones");
       const safeZones = response.data;
 
+      // Store zones information in state
+      setZones(prevZones => [...prevZones, ...safeZones]);
+
       // Extract markers directly without reversing coordinates
       const safeMarkersFromZones = safeZones.reduce((acc, zone) => {
-        return acc.concat(zone.markers.map(marker => ({
-          position: marker.coordinates,
-          _id: marker._id,
-          zone: zone._id, // Store the parent zone ID in the marker
-          timestamp: marker.timestamp,
-          locationName: zone.locationName // Store the location name
-        })));
+        return acc.concat(zone.markers.map(marker => {
+          // Validate coordinates
+          if (marker.coordinates && marker.coordinates.length === 2 && !isNaN(marker.coordinates[0]) && !isNaN(marker.coordinates[1])) {
+            return {
+              position: marker.coordinates,
+              description: marker.description || "No description provided",
+              _id: marker._id,
+              zone: { _id: zone._id }, // Store the parent zone ID in the marker
+              timestamp: marker.timestamp,
+              locationName: zone.locationName // Store the location name
+            };
+          }
+          return null;
+        }).filter(marker => marker !== null)); // Filter out invalid markers
       }, []);
       setSafeMarkers(existingMarkers => [...existingMarkers, ...safeMarkersFromZones]);
 
       // Process fetched zones to GeoJSON layers
       const safeGeoJsonData = safeZones.map(zone => {
-        const points = zone.markers.map(marker => turf.point([marker.coordinates[1], marker.coordinates[0]]));
+        const points = zone.markers.map(marker => {
+          if (marker.coordinates && marker.coordinates.length === 2 && !isNaN(marker.coordinates[0]) && !isNaN(marker.coordinates[1])) {
+            return turf.point([marker.coordinates[1], marker.coordinates[0]]);
+          }
+          return null;
+        }).filter(point => point !== null); // Filter out invalid points
         const featureCollection = turf.featureCollection(points);
-        return turf.convex(featureCollection); // Calculate the convex hull
-      }).filter(Boolean); // Filter out any undefined results
+        const hull = turf.convex(featureCollection);
+        if (hull) {
+          hull.properties = { zoneType: 'safe' }; // Add properties to the GeoJSON feature
+        }
+        return hull ? hull : null; // Return the hull if it exists, otherwise return null
+      }).filter(Boolean); // Filter out any undefined or null results
 
       // Set GeoJSON layers
       setSafeGeoJsonLayers(safeGeoJsonData);
@@ -195,17 +213,26 @@ const MapPage = () => {
       const response = await axios.get("http://localhost:3001/dangerzones");
       const dangerousZones = response.data;
 
+      // Store zones information in state
+      setZones(prevZones => [...prevZones, ...dangerousZones]);
+
       // Extract markers directly without reversing coordinates
       const dangerousMarkersFromZones = dangerousZones.reduce((acc, zone) => {
-        return acc.concat(zone.markers.map(marker => ({
-          position: marker.coordinates,
-          description: marker.description || "No description provided",
-          _id: marker._id,
-          zone: zone._id, // Store the parent zone ID in the marker
-          timestamp: marker.timestamp,
-          locationName: zone.locationName, // Store the location name
-          exception: marker.exception || "" // Store the exception attribute for danger markers
-        })));
+        return acc.concat(zone.markers.map(marker => {
+          // Validate coordinates
+          if (marker.coordinates && marker.coordinates.length === 2 && !isNaN(marker.coordinates[0]) && !isNaN(marker.coordinates[1])) {
+            return {
+              position: marker.coordinates,
+              description: marker.description || "No description provided",
+              _id: marker._id,
+              zone: { _id: zone._id }, // Store the parent zone ID in the marker
+              timestamp: marker.timestamp,
+              locationName: zone.locationName, // Store the location name
+              exception: marker.exception || "" // Store the exception attribute for danger markers
+            };
+          }
+          return null;
+        }).filter(marker => marker !== null)); // Filter out invalid markers
       }, []);
       setDangerousMarkers(existingMarkers => [...existingMarkers, ...dangerousMarkersFromZones]);
 
@@ -219,10 +246,19 @@ const MapPage = () => {
 
       // Process fetched zones to GeoJSON layers
       const dangerousGeoJsonData = dangerousZones.map(zone => {
-        const points = zone.markers.map(marker => turf.point([marker.coordinates[1], marker.coordinates[0]]));
+        const points = zone.markers.map(marker => {
+          if (marker.coordinates && marker.coordinates.length === 2 && !isNaN(marker.coordinates[0]) && !isNaN(marker.coordinates[1])) {
+            return turf.point([marker.coordinates[1], marker.coordinates[0]]);
+          }
+          return null;
+        }).filter(point => point !== null); // Filter out invalid points
         const featureCollection = turf.featureCollection(points);
-        return turf.convex(featureCollection); // Calculate the convex hull
-      }).filter(Boolean); // Filter out any undefined results
+        const hull = turf.convex(featureCollection);
+        if (hull) {
+          hull.properties = { zoneType: 'dangerous' }; // Add properties to the GeoJSON feature
+        }
+        return hull ? hull : null; // Return the hull if it exists, otherwise return null
+      }).filter(layer => layer !== null); // Filter out any null results
 
       // Set GeoJSON layers
       setDangerousGeoJsonLayers(dangerousGeoJsonData);
@@ -252,54 +288,62 @@ const MapPage = () => {
     setDeleteButtonClicked(true);
     let updatedMarkers = [];
     let markerId;
-    let zoneId;
 
     if (type === "safe") {
       updatedMarkers = [...safeMarkers];
       markerId = updatedMarkers[index]._id;
-      zoneId = updatedMarkers[index].zone;
 
-      // Delete marker
-      try {
-        await axios.delete(`http://localhost:3001/safetymarkers/${markerId}`);
-      } catch (error) {
-        console.error(`Error deleting safe marker: ${error}`);
+      console.log(`Deleting safe marker ID: ${markerId}`);
+
+      if (markerId) {
+        try {
+          await axios.delete(`http://localhost:3001/safetymarkers/${markerId}`);
+        } catch (error) {
+          console.error(`Error deleting safe marker: ${error}`);
+        }
+        updatedMarkers.splice(index, 1);
+        setSafeMarkers(updatedMarkers);
+        await refreshZones();
+      } else {
+        console.error(`Safe marker ID is undefined.`);
       }
-      updatedMarkers.splice(index, 1);
-      setSafeMarkers(updatedMarkers);
-      await refreshZones();
 
     } else if (type === "dangerous") {
       updatedMarkers = [...dangerousMarkers];
       markerId = updatedMarkers[index]._id;
-      zoneId = updatedMarkers[index].zone;
 
-      // Delete marker
-      try {
-        await axios.delete(`http://localhost:3001/dangermarkers/${markerId}`);
-      } catch (error) {
-        console.error(`Error deleting dangerous marker: ${error}`);
+      console.log(`Deleting dangerous marker ID: ${markerId}`);
+
+      if (markerId) {
+        try {
+          await axios.delete(`http://localhost:3001/dangermarkers/${markerId}`);
+        } catch (error) {
+          console.error(`Error deleting dangerous marker: ${error}`);
+        }
+        updatedMarkers.splice(index, 1);
+        setDangerousMarkers(updatedMarkers);
+        await refreshZones();
+      } else {
+        console.error(`Dangerous marker ID is undefined.`);
       }
-      updatedMarkers.splice(index, 1);
-      setDangerousMarkers(updatedMarkers);
-      await refreshZones();
-
-    } else if (type === "itinerary") {
-      updatedMarkers = [...itineraryMarkers];
-      markerId = updatedMarkers[index]._id;
-      zoneId = updatedMarkers[index].zone;
-
-      // Delete marker
-      try {
-        await axios.delete(`http://localhost:3001/itinerarymarkers/${markerId}`);
-      } catch (error) {
-        console.error(`Error deleting itinerary marker: ${error}`);
-      }
-      updatedMarkers.splice(index, 1);
-      setItineraryMarkers(updatedMarkers);
     }
-
     setDeleteButtonClicked(false);
+  };
+
+  // Function to handle zone deletion by deleting its markers
+  const handleZoneDelete = async (zoneId, zoneType) => {
+    const markersToDelete = zoneType === 'safe'
+      ? safeMarkers.filter(marker => marker.zone._id === zoneId)
+      : dangerousMarkers.filter(marker => marker.zone._id === zoneId);
+
+    try {
+      for (const marker of markersToDelete) {
+        await axios.delete(`http://localhost:3001/${zoneType === 'safe' ? 'safetymarkers' : 'dangermarkers'}/${marker._id}`);
+      }
+      await refreshZones();
+    } catch (error) {
+      console.error(`Error deleting markers for ${zoneType} zone: ${error}`);
+    }
   };
 
   // Function to calculate and set itinerary
@@ -353,9 +397,7 @@ const MapPage = () => {
         setYellowMarkerInfo({ locationName });
 
         // Check if map is defined before using flyTo
-        if (map) {
-          map.flyTo([latitudeResult, longitudeResult], 13);
-        }
+        if (map) map.flyTo([latitudeResult, longitudeResult], 13);
       } catch (error) {
         console.error("Error fetching location name:", error);
       }
@@ -414,27 +456,31 @@ const MapPage = () => {
 
   // Function to handle GeoJSON layer click event
   const handleLayerClick = (e, layer) => {
-    const zoneId = layer.feature.properties.zoneId;
+    const zoneId = layer.feature.properties.zoneId; // Use zoneId to identify zone
     const zoneType = layer.feature.properties.zoneType;
     setSelectedLayer({ zoneId, zoneType, latlng: e.latlng });
   };
 
   // Function to show GeoJSON layer confirmation dialog
   const showLayerConfirmationDialog = () => {
-    const { zoneId, zoneType, latlng } = selectedLayer;
+    const { zoneId, zoneType } = selectedLayer;
     return (
       <ConfirmationDialog
         message={`What would you like to do with this ${zoneType} zone?`}
-        onConfirm={(choice) => {
+        onConfirm={async (choice) => {
           if (choice === "delete") {
-            // Delete the whole zone
-            axios.delete(`http://localhost:3001/${zoneType}zones/${zoneId}`).then(() => {
-              refreshZones();
-            });
+            // Delete the whole zone by deleting its markers
+            await handleZoneDelete(zoneId, zoneType);
           } else if (choice === "view") {
-            // Navigate to the appropriate page
-            const viewPage = zoneType === "safe" ? "viewupdatesafezone" : "viewupdatedangerzone";
-            navigate(`/${viewPage}/${zoneId}`);
+            // Fetch the zone ID from the database and navigate to the view page
+            try {
+              const response = await axios.get(`http://localhost:3001/${zoneType}zones/${zoneId}`);
+              const zone = response.data;
+              const viewPage = zoneType === "safe" ? "viewupdatesafezone" : "viewupdatedangerzone";
+              navigate(`/${viewPage}/${zone._id}`);
+            } catch (error) {
+              console.error(`Error fetching ${zoneType} zone:`, error);
+            }
           }
           setSelectedLayer(null);
         }}
@@ -616,8 +662,11 @@ const MapPage = () => {
         <Link to="/" className="nav-link">
           Home
         </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
+        <Link to="/admindashboard" className="nav-link">
+          Dashboard
+        </Link>
+        <Link to="/login" className="nav-link">
+          Log Out
         </Link>
       </div>
       <div className="map-area">
@@ -652,7 +701,7 @@ const MapPage = () => {
               >
                 <PopupContent
                   title="Safe location"
-                  description=""
+                  description={marker.description}
                   locationName={marker.locationName}
                   position={marker.position}
                   onDelete={() => showConfirmationDialog(index, "safe")}
@@ -748,7 +797,7 @@ const MapPage = () => {
               eventHandlers={{
                 mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'safe' } } }),
                 mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'safe' } } }),
-                click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer._id, zoneType: 'safe' } } })
+                click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer.properties.zoneId, zoneType: 'safe' } } })
               }}
             />
           ))}
@@ -766,7 +815,7 @@ const MapPage = () => {
               eventHandlers={{
                 mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'dangerous' } } }),
                 mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'dangerous' } } }),
-                click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer._id, zoneType: 'dangerous' } } })
+                click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer.properties.zoneId, zoneType: 'dangerous' } } })
               }}
             />
           ))}
