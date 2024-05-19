@@ -30,20 +30,20 @@ import calculateItineraryIcon from "../Images/calculate_itinerary_icon.png";
 
 // Define Popup content component
 const PopupContent = ({ title, description, position, onDelete }) => {
-  const [locationName, setLocationName] = useState('Loading...');
+  const [locationName, setLocationName] = useState("Loading...");
 
   useEffect(() => {
     const fetchLocationName = async () => {
       try {
         const [latitude, longitude] = position; // Use correct order: [latitude, longitude]
-        const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
-          params: { longitude, latitude } // Use correct params
+        const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
+          params: { longitude, latitude }, // Use correct params
         });
         const data = response.data.features[0];
-        setLocationName(data ? data.place_name : 'Unknown location');
+        setLocationName(data ? data.place_name : "Unknown location");
       } catch (error) {
-        console.error('Error fetching location name:', error);
-        setLocationName('Unknown location');
+        console.error("Error fetching location name:", error);
+        setLocationName("Unknown location");
       }
     };
 
@@ -53,21 +53,21 @@ const PopupContent = ({ title, description, position, onDelete }) => {
   return (
     <div>
       <h3>{title}</h3>
-      <p>Location Name: {locationName}</p><br />
+      <p>Location Name: {locationName}</p>
+      <br />
       {title === "Danger" ? (
         <p>Danger: {description}</p>
       ) : (
         <p>{description}</p>
       )}
-      <br /><button className="view-button">
+      <br />
+      <button className="view-button">
         <Link to={`/marker/${position[0]},${position[1]}`}>View</Link> {/* Ensure order is correct */}
       </button>
       <button className="delete-button" onClick={onDelete}>Delete</button>
     </div>
   );
 };
-
-
 
 // Custom confirmation dialog component
 const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
@@ -111,7 +111,7 @@ const MapPage = () => {
       : "http://localhost:3001/safetymarkers/add";
 
     // Perform forward geocoding to get full information about the marker's location
-    const geocodeResponse = await axios.get('http://localhost:3001/mapbox/forward', {
+    const geocodeResponse = await axios.get("http://localhost:3001/mapbox/forward", {
       params: { q: `${marker.position[1]},${marker.position[0]}`, limit: 1 },
     });
 
@@ -123,10 +123,10 @@ const MapPage = () => {
       timestamp: new Date().toISOString(),
       place_name: geocodeData.place_name || "Unknown location",
       context: geocodeData.context || [], // Store the context array from the geocode response
-      ...(zoneType === "dangerous" && { exception: marker.exception || "" }) // Include exception attribute for danger markers
+      ...(zoneType === "dangerous" && { exception: marker.exception || "" }), // Include exception attribute for danger markers
     };
 
-    console.log('Sending payload:', JSON.stringify(payload, null, 2)); // Log the payload
+    console.log("Sending payload:", JSON.stringify(payload, null, 2)); // Log the payload
 
     try {
       const response = await axios.post(endpoint, payload);
@@ -142,68 +142,67 @@ const MapPage = () => {
     if (markers.length >= 10 && markers.length % 10 === 0) {
       // Extract the last 10 markers
       const lastTenMarkers = markers.slice(-10);
-
-      // Check timestamp difference
-      const firstTimestamp = new Date(lastTenMarkers[0].timestamp).getTime();
-      const lastTimestamp = new Date(lastTenMarkers[lastTenMarkers.length - 1].timestamp).getTime();
-      const timeDifference = (lastTimestamp - firstTimestamp) / 1000; // in seconds
-
-      if (timeDifference > 90) {
-        console.error("Markers were not added within 90 seconds. Zone creation failed.");
-        return;
-      }
-
+  
       // Calculate the convex hull (if needed)
-      const points = lastTenMarkers.map(marker => turf.point([marker.position[1], marker.position[0]]));
+      const points = lastTenMarkers.map((marker) =>
+        turf.point([marker.position[1], marker.position[0]])
+      );
       const featureCollection = turf.featureCollection(points);
       const hull = turf.convex(featureCollection);
-
-      if (hull) {
-        hull.properties = { zoneType }; // Add properties to the GeoJSON feature
-        setLayerFunc(layers => [...layers, hull]);
-      }
-
+  
       // Perform forward geocoding for each marker to get full information
-      const updatedMarkers = await Promise.all(lastTenMarkers.map(async marker => {
-        const geocodeResponse = await axios.get('http://localhost:3001/mapbox/forward', {
-          params: { q: `${marker.position[1]},${marker.position[0]}`, limit: 1 },
-        });
-
-        const geocodeData = geocodeResponse.data.features[0] || {};
-        return {
-          ...marker,
-          place_name: geocodeData.place_name || "Unknown location",
-          context: geocodeData.context || [], // Store the context array from the geocode response
-        };
-      }));
-
+      const updatedMarkers = await Promise.all(
+        lastTenMarkers.map(async (marker) => {
+          const geocodeResponse = await axios.get("http://localhost:3001/mapbox/forward", {
+            params: { q: `${marker.position[1]},${marker.position[0]}`, limit: 1 },
+          });
+  
+          const geocodeData = geocodeResponse.data.features[0] || {};
+          return {
+            ...marker,
+            place_name: geocodeData.place_name || "Unknown location",
+            context: geocodeData.context || [], // Store the context array from the geocode response
+          };
+        })
+      );
+  
       // Determine endpoint
       const endpoint =
         zoneType === "dangerous"
           ? "http://localhost:3001/dangerzones/add"
           : "http://localhost:3001/safezones/add";
-
+  
       // Format payload according to the zone type
       const payload = {
-        markers: updatedMarkers.map(marker => ({
+        markers: updatedMarkers.map((marker) => ({
           coordinates: marker.position,
           description: marker.description || "",
           timestamp: marker.timestamp,
           place_name: marker.place_name,
           context: marker.context,
-          ...(zoneType === "dangerous" && { exception: marker.exception || "" }) // Include exception attribute for danger markers
+          ...(zoneType === "dangerous" && { exception: marker.exception || "" }), // Include exception attribute for danger markers
         })),
       };
-
+  
       // Make the Axios POST request
       try {
         const response = await axios.post(endpoint, payload);
+        const createdZone = response.data.data.zone;
+  
+        if (hull && createdZone._id) {
+          hull.properties = { zoneType, zoneId: createdZone._id }; // Add properties to the GeoJSON feature
+          setLayerFunc((layers) => [...layers, hull]);
+        } else {
+          console.error("Hull or created zone ID is missing.");
+        }
+  
         console.log(`${zoneType} zones added to the database:`, response.data);
       } catch (error) {
         console.error(`Error adding ${zoneType} zones to the database:`, error);
       }
     }
   };
+  
 
   // Function to fetch safe zones from the server
   const fetchSafeZones = async () => {
@@ -212,42 +211,63 @@ const MapPage = () => {
       const safeZones = response.data;
 
       // Store zones information in state
-      setZones(prevZones => [...prevZones, ...safeZones]);
+      setZones((prevZones) => [...prevZones, ...safeZones]);
 
       // Extract markers directly without reversing coordinates
       const safeMarkersFromZones = safeZones.reduce((acc, zone) => {
-        return acc.concat(zone.markers.map(marker => {
-          // Validate coordinates
-          if (marker.coordinates && marker.coordinates.length === 2 && !isNaN(marker.coordinates[0]) && !isNaN(marker.coordinates[1])) {
-            return {
-              position: marker.coordinates,
-              description: marker.description || "No description provided",
-              _id: marker._id,
-              zone: { _id: zone._id }, // Store the parent zone ID in the marker
-              timestamp: marker.timestamp,
-              locationName: zone.locationName // Store the location name
-            };
-          }
-          return null;
-        }).filter(marker => marker !== null)); // Filter out invalid markers
+        return acc.concat(
+          zone.markers
+            .map((marker) => {
+              // Validate coordinates
+              if (
+                marker.coordinates &&
+                marker.coordinates.length === 2 &&
+                !isNaN(marker.coordinates[0]) &&
+                !isNaN(marker.coordinates[1])
+              ) {
+                return {
+                  position: marker.coordinates,
+                  description: marker.description || "No description provided",
+                  _id: marker._id,
+                  zone: { _id: zone._id }, // Store the parent zone ID in the marker
+                  timestamp: marker.timestamp,
+                  locationName: zone.locationName, // Store the location name
+                };
+              }
+              return null;
+            })
+            .filter((marker) => marker !== null) // Filter out invalid markers
+        );
       }, []);
-      setSafeMarkers(existingMarkers => [...existingMarkers, ...safeMarkersFromZones]);
+      setSafeMarkers((existingMarkers) => [
+        ...existingMarkers,
+        ...safeMarkersFromZones,
+      ]);
 
       // Process fetched zones to GeoJSON layers
-      const safeGeoJsonData = safeZones.map(zone => {
-        const points = zone.markers.map(marker => {
-          if (marker.coordinates && marker.coordinates.length === 2 && !isNaN(marker.coordinates[0]) && !isNaN(marker.coordinates[1])) {
-            return turf.point([marker.coordinates[1], marker.coordinates[0]]);
+      const safeGeoJsonData = safeZones
+        .map((zone) => {
+          const points = zone.markers
+            .map((marker) => {
+              if (
+                marker.coordinates &&
+                marker.coordinates.length === 2 &&
+                !isNaN(marker.coordinates[0]) &&
+                !isNaN(marker.coordinates[1])
+              ) {
+                return turf.point([marker.coordinates[1], marker.coordinates[0]]);
+              }
+              return null;
+            })
+            .filter((point) => point !== null); // Filter out invalid points
+          const featureCollection = turf.featureCollection(points);
+          const hull = turf.convex(featureCollection);
+          if (hull) {
+            hull.properties = { zoneType: "safe", zoneId: zone._id }; // Add properties to the GeoJSON feature
           }
-          return null;
-        }).filter(point => point !== null); // Filter out invalid points
-        const featureCollection = turf.featureCollection(points);
-        const hull = turf.convex(featureCollection);
-        if (hull) {
-          hull.properties = { zoneType: 'safe' }; // Add properties to the GeoJSON feature
-        }
-        return hull ? hull : null; // Return the hull if it exists, otherwise return null
-      }).filter(Boolean); // Filter out any undefined or null results
+          return hull ? hull : null; // Return the hull if it exists, otherwise return null
+        })
+        .filter(Boolean); // Filter out any undefined or null results
 
       // Set GeoJSON layers
       setSafeGeoJsonLayers(safeGeoJsonData);
@@ -263,51 +283,72 @@ const MapPage = () => {
       const dangerousZones = response.data;
 
       // Store zones information in state
-      setZones(prevZones => [...prevZones, ...dangerousZones]);
+      setZones((prevZones) => [...prevZones, ...dangerousZones]);
 
       // Extract markers directly without reversing coordinates
       const dangerousMarkersFromZones = dangerousZones.reduce((acc, zone) => {
-        return acc.concat(zone.markers.map(marker => {
-          // Validate coordinates
-          if (marker.coordinates && marker.coordinates.length === 2 && !isNaN(marker.coordinates[0]) && !isNaN(marker.coordinates[1])) {
-            return {
-              position: marker.coordinates,
-              description: marker.description || "No description provided",
-              _id: marker._id,
-              zone: { _id: zone._id }, // Store the parent zone ID in the marker
-              timestamp: marker.timestamp,
-              locationName: zone.locationName, // Store the location name
-              exception: marker.exception || "" // Store the exception attribute for danger markers
-            };
-          }
-          return null;
-        }).filter(marker => marker !== null)); // Filter out invalid markers
+        return acc.concat(
+          zone.markers
+            .map((marker) => {
+              // Validate coordinates
+              if (
+                marker.coordinates &&
+                marker.coordinates.length === 2 &&
+                !isNaN(marker.coordinates[0]) &&
+                !isNaN(marker.coordinates[1])
+              ) {
+                return {
+                  position: marker.coordinates,
+                  description: marker.description || "No description provided",
+                  _id: marker._id,
+                  zone: { _id: zone._id }, // Store the parent zone ID in the marker
+                  timestamp: marker.timestamp,
+                  locationName: zone.locationName, // Store the location name
+                  exception: marker.exception || "", // Store the exception attribute for danger markers
+                };
+              }
+              return null;
+            })
+            .filter((marker) => marker !== null) // Filter out invalid markers
+        );
       }, []);
-      setDangerousMarkers(existingMarkers => [...existingMarkers, ...dangerousMarkersFromZones]);
+      setDangerousMarkers((existingMarkers) => [
+        ...existingMarkers,
+        ...dangerousMarkersFromZones,
+      ]);
 
       // Populate dangerousDescriptions object
       const descriptionsMap = {};
-      dangerousMarkersFromZones.forEach(marker => {
+      dangerousMarkersFromZones.forEach((marker) => {
         const key = `${marker.position[0]},${marker.position[1]}`;
         descriptionsMap[key] = marker.description;
       });
       setDangerousDescriptions(descriptionsMap);
 
       // Process fetched zones to GeoJSON layers
-      const dangerousGeoJsonData = dangerousZones.map(zone => {
-        const points = zone.markers.map(marker => {
-          if (marker.coordinates && marker.coordinates.length === 2 && !isNaN(marker.coordinates[0]) && !isNaN(marker.coordinates[1])) {
-            return turf.point([marker.coordinates[1], marker.coordinates[0]]);
+      const dangerousGeoJsonData = dangerousZones
+        .map((zone) => {
+          const points = zone.markers
+            .map((marker) => {
+              if (
+                marker.coordinates &&
+                marker.coordinates.length === 2 &&
+                !isNaN(marker.coordinates[0]) &&
+                !isNaN(marker.coordinates[1])
+              ) {
+                return turf.point([marker.coordinates[1], marker.coordinates[0]]);
+              }
+              return null;
+            })
+            .filter((point) => point !== null); // Filter out invalid points
+          const featureCollection = turf.featureCollection(points);
+          const hull = turf.convex(featureCollection);
+          if (hull) {
+            hull.properties = { zoneType: "dangerous", zoneId: zone._id }; // Add properties to the GeoJSON feature
           }
-          return null;
-        }).filter(point => point !== null); // Filter out invalid points
-        const featureCollection = turf.featureCollection(points);
-        const hull = turf.convex(featureCollection);
-        if (hull) {
-          hull.properties = { zoneType: 'dangerous' }; // Add properties to the GeoJSON feature
-        }
-        return hull ? hull : null; // Return the hull if it exists, otherwise return null
-      }).filter(layer => layer !== null); // Filter out any null results
+          return hull ? hull : null; // Return the hull if it exists, otherwise return null
+        })
+        .filter((layer) => layer !== null); // Filter out any null results
 
       // Set GeoJSON layers
       setDangerousGeoJsonLayers(dangerousGeoJsonData);
@@ -356,7 +397,6 @@ const MapPage = () => {
       } else {
         console.error(`Safe marker ID is undefined.`);
       }
-
     } else if (type === "dangerous") {
       updatedMarkers = [...dangerousMarkers];
       markerId = updatedMarkers[index]._id;
@@ -417,9 +457,10 @@ const MapPage = () => {
           ? "http://localhost:3001/mapbox/forward"
           : "http://localhost:3001/mapbox/reverse-geocode";
 
-      const params = searchType === "forward"
-        ? { q: searchQuery, limit: 1 }
-        : { longitude: longitude, latitude: latitude };
+      const params =
+        searchType === "forward"
+          ? { q: searchQuery, limit: 1 }
+          : { longitude, latitude };
 
       const response = await axios.get(endpoint, { params });
 
@@ -439,13 +480,14 @@ const MapPage = () => {
 
       // Fetch the location name
       try {
-        const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+        const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
           params: {
             longitude: longitudeResult,
             latitude: latitudeResult,
           },
         });
-        const locationName = response.data.features[0]?.place_name || "Unknown location";
+        const locationName =
+          response.data.features[0]?.place_name || "Unknown location";
         setYellowMarkerInfo({ locationName });
 
         // Check if map is defined before using flyTo
@@ -462,13 +504,14 @@ const MapPage = () => {
   const handleMouseover = (e, marker) => {
     hoverTimeout.current = setTimeout(async () => {
       try {
-        const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+        const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
           params: {
             longitude: marker.position[1],
             latitude: marker.position[0],
           },
         });
-        const locationName = response.data.features[0]?.place_name || "Unknown location";
+        const locationName =
+          response.data.features[0]?.place_name || "Unknown location";
         setHoveredMarker({
           position: marker.position,
           locationName,
@@ -561,15 +604,15 @@ const MapPage = () => {
             const setMarkers =
               activeAction === "addSafe" ? setSafeMarkers : setDangerousMarkers;
 
-            if (!markerList.some(marker => marker.position[0] === lat && marker.position[1] === lng)) {
+            if (!markerList.some((marker) => marker.position[0] === lat && marker.position[1] === lng)) {
               if (activeAction === "addDangerous") {
                 const description = prompt("Enter description for the dangerous location:");
                 if (description === null || description.trim() === "") {
                   return; // Exit if no description is provided or cancelled
                 }
-                setDangerousDescriptions(prev => ({
+                setDangerousDescriptions((prev) => ({
                   ...prev,
-                  [`${lat},${lng}`]: description
+                  [`${lat},${lng}`]: description,
                 }));
                 newMarker.description = description; // Store description directly in the marker if needed immediately
               }
@@ -585,7 +628,7 @@ const MapPage = () => {
 
                 // Fetch the location name
                 try {
-                  const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+                  const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
                     params: {
                       longitude: lng,
                       latitude: lat,
@@ -595,7 +638,11 @@ const MapPage = () => {
                   newMarker.locationName = locationName;
 
                   setMarkers(updatedMarkerList);
-                  updateGeoJsonLayer(updatedMarkerList, zoneType === "safe" ? setSafeGeoJsonLayers : setDangerousGeoJsonLayers, zoneType);
+                  updateGeoJsonLayer(
+                    updatedMarkerList,
+                    zoneType === "safe" ? setSafeGeoJsonLayers : setDangerousGeoJsonLayers,
+                    zoneType
+                  );
                 } catch (error) {
                   console.error("Error fetching location name:", error);
                 }
@@ -608,7 +655,7 @@ const MapPage = () => {
 
               // Fetch the location name
               try {
-                const response = await axios.get('http://localhost:3001/mapbox/reverse-geocode', {
+                const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
                   params: {
                     longitude: lng,
                     latitude: lat,
@@ -617,7 +664,7 @@ const MapPage = () => {
                 const locationName = response.data.features[0]?.place_name || "Unknown location";
                 newMarker.locationName = locationName;
 
-                setItineraryMarkers(prev => [...prev, newMarker]);
+                setItineraryMarkers((prev) => [...prev, newMarker]);
               } catch (error) {
                 console.error("Error fetching location name:", error);
               }
@@ -664,7 +711,7 @@ const MapPage = () => {
     setConfirmationDialog(
       <ConfirmationDialog
         message="What would you like to do with this marker?"
-        onConfirm={choice => {
+        onConfirm={(choice) => {
           if (choice === "delete") {
             handleMarkerDelete(index, type);
           } else if (choice === "view") {
@@ -837,41 +884,65 @@ const MapPage = () => {
           )}
           {/* Render safe GeoJSON layers */}
           {safeGeoJsonLayers.map((layer, index) => (
-  <GeoJSON
-    key={`safe-layer-${index}`}
-    data={layer}
-    style={{
-      color: "#00FF00",
-      weight: 2,
-      opacity: 0.8,  // Adjust opacity here
-      fillOpacity: 0.4,  // Adjust fillOpacity here
-    }}
-    eventHandlers={{
-      mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'safe' } } }),
-      mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'safe' } } }),
-      click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer.properties.zoneId, zoneType: 'safe' } } })
-    }}
-  />
-))}
+            <GeoJSON
+              key={`safe-layer-${index}`}
+              data={layer}
+              style={{
+                color: "#00FF00",
+                weight: 2,
+                opacity: 0.8, // Adjust opacity here
+                fillOpacity: 0.4, // Adjust fillOpacity here
+              }}
+              eventHandlers={{
+                mouseover: (e) =>
+                  handleLayerMouseover(e, {
+                    feature: { properties: { zoneType: "safe" } },
+                  }),
+                mouseout: (e) =>
+                  handleLayerMouseout(e, {
+                    feature: { properties: { zoneType: "safe" } },
+                  }),
+                click: (e) =>
+                  handleLayerClick(e, {
+                    feature: {
+                      properties: { zoneId: layer.properties.zoneId, zoneType: "safe" },
+                    },
+                  }),
+              }}
+            />
+          ))}
 
-{dangerousGeoJsonLayers.map((layer, index) => (
-  <GeoJSON
-    key={`dangerous-layer-${index}`}
-    data={layer}
-    style={{
-      color: "#FF0000",
-      weight: 2,
-      opacity: 0.8,  // Adjust opacity here
-      fillOpacity: 0.4,  // Adjust fillOpacity here
-    }}
-    eventHandlers={{
-      mouseover: (e) => handleLayerMouseover(e, { feature: { properties: { zoneType: 'dangerous' } } }),
-      mouseout: (e) => handleLayerMouseout(e, { feature: { properties: { zoneType: 'dangerous' } } }),
-      click: (e) => handleLayerClick(e, { feature: { properties: { zoneId: layer.properties.zoneId, zoneType: 'dangerous' } } })
-    }}
-  />
-))}
-
+          {dangerousGeoJsonLayers.map((layer, index) => (
+            <GeoJSON
+              key={`dangerous-layer-${index}`}
+              data={layer}
+              style={{
+                color: "#FF0000",
+                weight: 2,
+                opacity: 0.8, // Adjust opacity here
+                fillOpacity: 0.4, // Adjust fillOpacity here
+              }}
+              eventHandlers={{
+                mouseover: (e) =>
+                  handleLayerMouseover(e, {
+                    feature: { properties: { zoneType: "dangerous" } },
+                  }),
+                mouseout: (e) =>
+                  handleLayerMouseout(e, {
+                    feature: { properties: { zoneType: "dangerous" } },
+                  }),
+                click: (e) =>
+                  handleLayerClick(e, {
+                    feature: {
+                      properties: {
+                        zoneId: layer.properties.zoneId,
+                        zoneType: "dangerous",
+                      },
+                    },
+                  }),
+              }}
+            />
+          ))}
         </MapContainer>
         {/* Render message if any */}
         {message && (
