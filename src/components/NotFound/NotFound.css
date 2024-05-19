@@ -1,46 +1,70 @@
+/* General Reset for NotFound */
+.not-found-container body, .not-found-container html, .not-found-container #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Not Found Container */
 .not-found-container {
-  height: 50%;
-  width: 100%;
-  color: #378ce7;
-  font-family: Monaco, monospace;
-  margin-left: 60%;
-}
-
-.navbar {
-  height: 60px;
-  width: 100%;
-  background-color: #378ce7;
-  padding: 10px 0;
-  z-index: 10;
-  display: flex;
-  justify-content: space-around;
-}
-
-.nav-link {
-  color: white;
-  text-decoration: none;
-  padding: 0 10px;
-  transition: color 0.3s ease;
-}
-
-.center-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  padding-top: 60px;
-  box-sizing: border-box;
-  text-align: center;
-}
-p {
-  display: inline;
-}
-.center-content h1 {
-  margin: 10px 0;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  color: #2e3b4e;
 }
 
-.center-content p {
-  display: inline;
-  margin: 0;
+/* Navbar */
+.not-found-container .navbar {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #2e3b4e;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-container .nav-link {
+  color: #ffffff;
+  margin-left: 15px;
+  text-decoration: none;
+  padding: 5px 15px;
+  border-radius: 5px;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.not-found-container .nav-link:hover {
+  background-color: #3b4c67;
+  transform: scale(1.05);
+}
+
+/* Center Content */
+.not-found-container .center-content {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-container .center-content h1 {
+  font-size: 36px;
+  font-weight: bold;
+  color: #2e3b4e;
+  margin-bottom: 20px;
+}
+
+.not-found-container .center-content p {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #124076;
+  text-align: justify;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 3px rgba(55, 140, 231, 0.5);
 }

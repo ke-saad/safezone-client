@@ -474,7 +474,7 @@ const MapPage = () => {
       }
 
       const result = response.data.features[0];
-      const [latitudeResult, longitudeResult] = result.geometry.coordinates;
+      const [longitudeResult, latitudeResult] = result.geometry.coordinates;
 
       // Remove previous yellow marker
       setYellowMarkerPosition(null);

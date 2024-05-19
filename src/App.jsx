@@ -22,6 +22,8 @@ import ViewAllDangerZones from './components/ViewAllDangerZones/ViewAllDangerZon
 import ViewUpdateDangerZonePage from './components/ViewUpdateDangerZonePage/ViewUpdateDangerZonePage';
 import LocationInfoPage from './components/LocationInfoPage/LocationInfoPage';
 import ViewMarkerDetails from './components/ViewMarkerDetails/ViewMarkerDetails';
+import ActivityLogs from './components/ActivityLogs/ActivityLogs';
+import UserActivityLog from './components/UserActivityLog/UserActivityLog';
 
 function App() {
   return (
@@ -51,6 +53,8 @@ function App() {
         <Route path='/viewupdatedangerzone/:id' element={<ViewUpdateDangerZonePage />} />
         <Route path="/location/:lng/:lat" element={<LocationInfoPage />} />
         <Route path="/marker/:id" element={<ViewMarkerDetails />} />
+        <Route path="/activitylogs" element={<ActivityLogs />} />
+        <Route path="/activitylogs/useractivitylog/:username" element={<UserActivityLog />} />
       </Routes>
     </BrowserRouter>
   );

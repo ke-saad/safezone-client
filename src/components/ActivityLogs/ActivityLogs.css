@@ -1,0 +1,116 @@
+/* General Reset */
+body, html, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Background Overlay */
+  .background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("../Images/world_map.jpg");
+    background-size: cover;
+    background-position: center;
+    opacity: 0.5;
+    z-index: -1;
+  }
+  
+  /* Navbar */
+  .navbar {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #2e3b4e;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .nav-link {
+    color: #ffffff;
+    margin-left: 15px;
+    text-decoration: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+    transition: background-color 0.2s, transform 0.2s;
+  }
+  
+  .nav-link:hover {
+    background-color: #3b4c67;
+    transform: scale(1.05);
+  }
+  
+  /* Activity Logs Container */
+  .activity-logs-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    color: #2e3b4e;
+  }
+  
+  h1 {
+    font-size: 32px;
+    margin-bottom: 30px;
+    font-weight: bold;
+    color: #2e3b4e;
+    text-shadow: 2px 2px 4px rgba(46, 59, 78, 0.5);
+  }
+  
+  /* Search Input */
+  .search-input {
+    margin: 10px auto;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 300px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-width: 3px;
+    border-color: #378ce7;
+    box-shadow: 0 0 5px rgba(55, 140, 231, 0.5);
+  }
+  
+  .search-input::placeholder {
+    color: rgba(55, 140, 231, 0.4);
+  }
+  
+  /* Logs Table */
+  .logs-table {
+    width: 80%;
+    margin: 20px 0;
+    border-collapse: collapse;
+  }
+  
+  .logs-table th, .logs-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .logs-table th {
+    background-color: #2e3b4e;
+    color: white;
+  }
+  
+  .logs-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .logs-table tr:hover {
+    background-color: #ddd;
+  }
+  

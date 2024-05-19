@@ -61,7 +61,7 @@ const AdminDashboard = () => {
   };
 
   const handleManageActivityLogs = () => {
-    navigate("/admin/activitylogs");
+    navigate("/activitylogs");
   };
 
   const handleManageAlerts = () => {
