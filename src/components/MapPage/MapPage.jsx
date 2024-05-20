@@ -13,7 +13,6 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapPage.css";
-import calculateItinerary from "./itineraryService";
 import * as turf from "@turf/turf";
 
 // Import marker icons
@@ -104,6 +103,15 @@ const MapPage = () => {
   const [selectedLayer, setSelectedLayer] = useState(null); // To handle selected GeoJSON layer
   const [zones, setZones] = useState([]); // To store all zone information
   const [completedZones, setCompletedZones] = useState([]); // To track completed zones
+  const [itineraryOptions, setItineraryOptions] = useState({
+    profile: "driving",
+    alternatives: "false",
+    annotations: "",
+    steps: "true",
+    banner_instructions: "true",
+    voice_instructions: "false"
+  });
+  const [showDropdown, setShowDropdown] = useState(false); // State to control dropdown visibility
 
   // Function to add marker to the database
   const addMarkerToDatabase = async (marker, zoneType) => {
@@ -446,10 +454,30 @@ const MapPage = () => {
   const calculateAndSetItinerary = async () => {
     if (itineraryMarkers.length === 2) {
       const [start, end] = itineraryMarkers;
-      const itinerary = await calculateItinerary(start.position, end.position);
-      // Process and display the itinerary
+      try {
+        const response = await axios.post('http://localhost:3001/calculate-itinerary', {
+          startCoordinates: start.position,
+          endCoordinates: end.position,
+          profile: itineraryOptions.profile // Use only the profile parameter
+        });
+
+        const itinerary = response.data.itinerary;
+
+        if (itinerary && itinerary.routes && itinerary.routes.length > 0) {
+          // Display the itinerary on the map
+          const routeCoordinates = itinerary.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+          const routeLayer = L.polyline(routeCoordinates, { color: 'blue' }).addTo(map);
+
+          setMessage(`Itinerary calculated: ${itinerary.routes[0].legs[0].summary}`);
+        } else {
+          setMessage('Itinerary calculation failed.');
+        }
+      } catch (error) {
+        console.error('Error calculating itinerary:', error);
+        setMessage('Error calculating itinerary.');
+      }
     } else {
-      setMessage("Please select start and end points first.");
+      setMessage('Please select start and end points first.');
     }
   };
 
@@ -1002,11 +1030,111 @@ const MapPage = () => {
           <button
             className="control-button"
             data-action="calculateItinerary"
-            onClick={calculateAndSetItinerary}
+            onClick={() => setShowDropdown(!showDropdown)}
             title="Calculate Itinerary"
           >
             <img src={calculateItineraryIcon} alt="Calculate Itinerary" />
           </button>
+          {showDropdown && (
+            <div className="itinerary-dropdown">
+              <label>
+                Profile:
+                <select
+                  value={itineraryOptions.profile}
+                  onChange={(e) =>
+                    setItineraryOptions({ ...itineraryOptions, profile: e.target.value })
+                  }
+                >
+                  <option value="driving">Driving</option>
+                  <option value="walking">Walking</option>
+                  <option value="cycling">Cycling</option>
+                </select>
+              </label>
+              <button onClick={calculateAndSetItinerary}>Calculate</button>
+            </div>
+          )}
+        </div>
+        {/* Itinerary options modal */}
+        <div className="itinerary-options">
+          <h3>Itinerary Options</h3>
+          <label>
+            Profile:
+            <select
+              value={itineraryOptions.profile}
+              onChange={(e) =>
+                setItineraryOptions({ ...itineraryOptions, profile: e.target.value })
+              }
+            >
+              <option value="driving">Driving</option>
+              <option value="walking">Walking</option>
+              <option value="cycling">Cycling</option>
+            </select>
+          </label>
+          <label>
+            Alternatives:
+            <select
+              value={itineraryOptions.alternatives}
+              onChange={(e) =>
+                setItineraryOptions({ ...itineraryOptions, alternatives: e.target.value })
+              }
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
+          <label>
+            Annotations:
+            <input
+              type="text"
+              value={itineraryOptions.annotations}
+              onChange={(e) =>
+                setItineraryOptions({ ...itineraryOptions, annotations: e.target.value })
+              }
+              placeholder="distance,duration,speed"
+            />
+          </label>
+          <label>
+            Steps:
+            <select
+              value={itineraryOptions.steps}
+              onChange={(e) =>
+                setItineraryOptions({ ...itineraryOptions, steps: e.target.value })
+              }
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
+          <label>
+            Banner Instructions:
+            <select
+              value={itineraryOptions.banner_instructions}
+              onChange={(e) =>
+                setItineraryOptions({
+                  ...itineraryOptions,
+                  banner_instructions: e.target.value,
+                })
+              }
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
+          <label>
+            Voice Instructions:
+            <select
+              value={itineraryOptions.voice_instructions}
+              onChange={(e) =>
+                setItineraryOptions({
+                  ...itineraryOptions,
+                  voice_instructions: e.target.value,
+                })
+              }
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
         </div>
       </div>
       {confirmationDialog}
