@@ -55,6 +55,9 @@ function App() {
         <Route path="/marker/:id" element={<ViewMarkerDetails />} />
         <Route path="/activitylogs" element={<ActivityLogs />} />
         <Route path="/activitylogs/useractivitylog/:username" element={<UserActivityLog />} />
+        
+        
+
       </Routes>
     </BrowserRouter>
   );

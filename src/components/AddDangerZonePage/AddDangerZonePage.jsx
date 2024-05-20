@@ -10,22 +10,39 @@ const AddDangerZonePage = () => {
   const [markers, setMarkers] = useState([]);
   const [message, setMessage] = useState("");
 
-  const addMarker = () => {
+  const addMarker = async () => {
     if (!latitude || !longitude || !description) {
       setMessage("Latitude, longitude, and description are required.");
       return;
     }
 
-    const newMarker = {
-      coordinates: [parseFloat(longitude), parseFloat(latitude)],
-      description: description
-    };
+    try {
+      const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
+        params: {
+          longitude: longitude,
+          latitude: latitude
+        }
+      });
+      const placeName = response.data.features[0]?.place_name || "Unknown location";
+      const context = response.data.features[0]?.context || [];
 
-    setMarkers([...markers, newMarker]);
-    setLatitude("");
-    setLongitude("");
-    setDescription("");
-    setMessage(`Marker added successfully. Total markers: ${markers.length + 1}`);
+      const newMarker = {
+        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+        description: description,
+        place_name: placeName,
+        context: context,
+        timestamp: new Date().toISOString()
+      };
+
+      setMarkers([...markers, newMarker]);
+      setLatitude("");
+      setLongitude("");
+      setDescription("");
+      setMessage(`Marker added successfully. Total markers: ${markers.length + 1}`);
+    } catch (error) {
+      setMessage("Failed to fetch location details.");
+      console.error("Error:", error);
+    }
   };
 
   const removeMarker = (index) => {
@@ -98,7 +115,7 @@ const AddDangerZonePage = () => {
           <ul>
             {markers.map((marker, index) => (
               <li key={index}>
-                Latitude: {marker.coordinates[1]}, Longitude: {marker.coordinates[0]}, Description: {marker.description}
+                Latitude: {marker.coordinates[1]}, Longitude: {marker.coordinates[0]}, Description: {marker.description}, Place Name: {marker.place_name}
                 <button type="button" className="remove-button" onClick={() => removeMarker(index)}>Remove</button>
               </li>
             ))}

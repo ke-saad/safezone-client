@@ -21,8 +21,9 @@ body, html, #root {
   z-index: -1;
 }
 
-/* View Update Safe Zone Container */
-.view-update-safe-zone-container {
+/* View Update Zone Container */
+.view-update-safe-zone-container,
+.view-update-danger-zone-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -61,7 +62,7 @@ body, html, #root {
 /* Content */
 .content {
   width: 60%;
-  max-width: 600px;
+  max-width: 800px;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
   padding: 20px;
@@ -86,7 +87,8 @@ body, html, #root {
   color: green;
 }
 
-.update-safe-zone-form h3 {
+.update-safe-zone-form h3,
+.update-danger-zone-form h3 {
   text-align: center;
   margin-bottom: 15px;
   font-weight: bold;
@@ -119,6 +121,7 @@ body, html, #root {
   background-color: #e6e6e6;
 }
 
+.view-button,
 .remove-button {
   padding: 5px 10px;
   margin-left: 10px;
@@ -126,9 +129,22 @@ body, html, #root {
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.view-button {
+  background-color: #378ce7;
+  color: white;
+}
+
+.view-button:hover {
+  background-color: #124076;
+  transform: scale(1.05);
+}
+
+.remove-button {
   background-color: #e74c3c;
   color: white;
-  transition: background-color 0.3s, transform 0.2s;
 }
 
 .remove-button:hover {
@@ -170,4 +186,72 @@ body, html, #root {
 .update-button:hover {
   background-color: #2e7d32;
   transform: scale(1.05);
+}
+
+.add-marker-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  z-index: 1000;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dialog-option {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.input-item {
+  margin-bottom: 15px;
+}
+
+.input-item label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-item input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.dialog-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.dialog-button {
+  background-color: #378ce7;
+  color: white;
+}
+
+.dialog-button:hover {
+  background-color: #124076;
+  transform: scale(1.05);
+}
+
+.dialog-button:last-of-type {
+  background-color: #e74c3c;
+}
+
+.dialog-button:last-of-type:hover {
+  background-color: #c0392b;
 }

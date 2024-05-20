@@ -9,20 +9,37 @@ const AddSafeZonePage = () => {
   const [markers, setMarkers] = useState([]);
   const [message, setMessage] = useState("");
 
-  const addMarker = () => {
+  const addMarker = async () => {
     if (!latitude || !longitude) {
       setMessage("Latitude and longitude are required.");
       return;
     }
 
-    const newMarker = {
-      coordinates: [parseFloat(longitude), parseFloat(latitude)],
-    };
+    try {
+      const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
+        params: {
+          longitude: longitude,
+          latitude: latitude
+        }
+      });
+      const placeName = response.data.features[0]?.place_name || "Unknown location";
+      const context = response.data.features[0]?.context || [];
 
-    setMarkers([...markers, newMarker]);
-    setLatitude("");
-    setLongitude("");
-    setMessage(`Marker added successfully. Total markers: ${markers.length + 1}`);
+      const newMarker = {
+        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+        place_name: placeName,
+        context: context,
+        timestamp: new Date().toISOString()
+      };
+
+      setMarkers([...markers, newMarker]);
+      setLatitude("");
+      setLongitude("");
+      setMessage(`Marker added successfully. Total markers: ${markers.length + 1}`);
+    } catch (error) {
+      setMessage("Failed to fetch location details.");
+      console.error("Error:", error);
+    }
   };
 
   const removeMarker = (index) => {
@@ -77,12 +94,8 @@ const AddSafeZonePage = () => {
             />
           </div>
           <div className="button-group">
-            <button type="button" className="add-button" onClick={addMarker}>
-              Add Marker
-            </button>
-            <button type="submit" className="submit-button">
-              Create Safe Zone
-            </button>
+            <button type="button" className="add-button" onClick={addMarker}>Add Marker</button>
+            <button type="submit" className="submit-button">Create Safe Zone</button>
           </div>
         </form>
         {message && <div className="message">{message}</div>}
@@ -91,10 +104,8 @@ const AddSafeZonePage = () => {
           <ul>
             {markers.map((marker, index) => (
               <li key={index}>
-                Latitude: {marker.coordinates[1]}, Longitude: {marker.coordinates[0]}{" "}
-                <button type="button" className="remove-button" onClick={() => removeMarker(index)}>
-                  Remove
-                </button>
+                Latitude: {marker.coordinates[1]}, Longitude: {marker.coordinates[0]}, Place Name: {marker.place_name}
+                <button type="button" className="remove-button" onClick={() => removeMarker(index)}>Remove</button>
               </li>
             ))}
           </ul>

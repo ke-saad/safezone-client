@@ -10,20 +10,9 @@ const ViewMarkerDetails = () => {
 
   const fetchMarkerDetails = async () => {
     try {
-      const [longitude, latitude] = id.split(',');
-      const response = await axios.get(`http://localhost:3001/mapbox/reverse-geocode`, {
-        params: { longitude, latitude }
-      });
-      const data = response.data.features[0];
-      if (data) {
-        const markerDetails = {
-          coordinates: data.geometry.coordinates,
-          description: "Retrieved from reverse geocoding",
-          place_name: data.place_name,
-          timestamp: new Date().toISOString(),
-          context: data.context || []
-        };
-        setMarker(markerDetails);
+      const response = await axios.get(`http://localhost:3001/markers/${id}`);
+      if (response.data) {
+        setMarker(response.data);
       } else {
         setMessage("Failed to fetch marker details.");
       }
@@ -46,7 +35,7 @@ const ViewMarkerDetails = () => {
         <Link to="/map" className="nav-link">Map</Link>
       </div>
       <div className="background-overlay"></div>
-      <div className="content">        
+      <div className="content">
         {message && <div className="message">{message}</div>}
         {marker ? (
           <div className="marker-details">
@@ -56,7 +45,13 @@ const ViewMarkerDetails = () => {
               <p><strong>Longitude:</strong> {marker.coordinates[0]}</p><br />
               <p><strong>Description:</strong> {marker.description}</p><br />
               <p><strong>Place Name:</strong> {marker.place_name}</p><br />
-              <p><strong>Pinning Date:</strong> {new Date(marker.timestamp).toLocaleString()}</p>
+              <p><strong>Pinning Date:</strong> {new Date(marker.timestamp).toLocaleString()}</p><br />
+              <p><strong>Context:</strong></p>
+              <ul>
+                {marker.context.map((item, index) => (
+                  <li key={index}>{item.text} ({item.wikidata || item.mapbox_id})</li>
+                ))}
+              </ul>
             </div>
           </div>
         ) : (

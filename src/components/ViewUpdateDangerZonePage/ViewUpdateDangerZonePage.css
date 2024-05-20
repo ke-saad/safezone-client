@@ -1,174 +1,257 @@
 /* General Reset */
 body, html, #root {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  /* Background Overlay */
-  .background-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-image: url("../Images/world_map.jpg");
-    background-size: cover;
-    background-position: center;
-    opacity: 0.5;
-    z-index: -1;
-  }
-  
-  /* View Update Danger Zone Container */
-  .view-update-danger-zone-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    color: #2e3b4e;
-    overflow: hidden;
-  }
-  
-  /* Navbar */
-  .navbar {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    padding: 10px 20px;
-    background-color: #2e3b4e;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .nav-link {
-    text-decoration: none;
-    color: #ffffff;
-    padding: 5px 15px;
-    border-radius: 5px;
-    transition: background-color 0.2s, transform 0.2s;
-  }
-  
-  .nav-link:hover {
-    background-color: #3b4c67;
-    transform: scale(1.05);
-  }
-  
-  /* Content */
-  .content {
-    width: 60%;
-    max-width: 800px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-    text-align: left;
-    position: relative;
-    z-index: 1;
-  }
-  
-  .title {
-    font-size: 32px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    color: #2e3b4e;
-    text-shadow: 2px 2px 4px rgba(46, 59, 78, 0.5);
-    text-align: center;
-  }
-  
-  .message {
-    text-align: center;
-    margin-top: 10px;
-    color: green;
-  }
-  
-  .update-danger-zone-form h3 {
-    text-align: center;
-    margin-bottom: 15px;
-    font-weight: bold;
-    color: #2e3b4e;
-  }
-  
-  .table-container {
-    max-height: 250px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    margin-bottom: 15px;
-  }
-  
-  .markers-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .markers-table th,
-  .markers-table td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: left;
-    background-color: rgba(255, 255, 255, 0.8);
-  }
-  
-  .markers-table th {
-    background-color: #e6e6e6;
-  }
-  
-  .remove-button {
-    padding: 5px 10px;
-    margin-left: 10px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    background-color: #e74c3c;
-    color: white;
-    transition: background-color 0.3s, transform 0.2s;
-  }
-  
-  .remove-button:hover {
-    background-color: #c0392b;
-    transform: scale(1.05);
-  }
-  
-  .button-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  .add-button,
-  .update-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s, transform 0.2s;
-  }
-  
-  .add-button {
-    background-color: #378ce7;
-    color: white;
-  }
-  
-  .add-button:hover {
-    background-color: #124076;
-    transform: scale(1.05);
-  }
-  
-  .update-button {
-    background-color: #4caf50;
-    color: white;
-  }
-  
-  .update-button:hover {
-    background-color: #2e7d32;
-    transform: scale(1.05);
-  }
-  
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Background Overlay */
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("../Images/world_map.jpg");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* View Update Zone Container */
+.view-update-safe-zone-container,
+.view-update-danger-zone-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  color: #2e3b4e;
+  overflow: hidden;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #2e3b4e;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #ffffff;
+  padding: 5px 15px;
+  border-radius: 5px;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.nav-link:hover {
+  background-color: #3b4c67;
+  transform: scale(1.05);
+}
+
+/* Content */
+.content {
+  width: 60%;
+  max-width: 800px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  font-size: 32px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #2e3b4e;
+  text-shadow: 2px 2px 4px rgba(46, 59, 78, 0.5);
+  text-align: center;
+}
+
+.message {
+  text-align: center;
+  margin-top: 10px;
+  color: green;
+}
+
+.update-safe-zone-form h3,
+.update-danger-zone-form h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+  color: #2e3b4e;
+}
+
+.table-container {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+}
+
+.markers-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.markers-table th,
+.markers-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.markers-table th {
+  background-color: #e6e6e6;
+}
+
+.view-button,
+.remove-button {
+  padding: 5px 10px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.view-button {
+  background-color: #378ce7;
+  color: white;
+}
+
+.view-button:hover {
+  background-color: #124076;
+  transform: scale(1.05);
+}
+
+.remove-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.remove-button:hover {
+  background-color: #c0392b;
+  transform: scale(1.05);
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.add-button,
+.update-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.add-button {
+  background-color: #378ce7;
+  color: white;
+}
+
+.add-button:hover {
+  background-color: #124076;
+  transform: scale(1.05);
+}
+
+.update-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.update-button:hover {
+  background-color: #2e7d32;
+  transform: scale(1.05);
+}
+
+.add-marker-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  z-index: 1000;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dialog-option {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.input-item {
+  margin-bottom: 15px;
+}
+
+.input-item label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-item input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.dialog-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.dialog-button {
+  background-color: #378ce7;
+  color: white;
+}
+
+.dialog-button:hover {
+  background-color: #124076;
+  transform: scale(1.05);
+}
+
+.dialog-button:last-of-type {
+  background-color: #e74c3c;
+}
+
+.dialog-button:last-of-type:hover {
+  background-color: #c0392b;
+}
