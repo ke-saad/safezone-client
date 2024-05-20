@@ -383,47 +383,21 @@ const MapPage = () => {
   };
 
   // Function to handle marker deletion
-  const handleMarkerDelete = async (index, type) => {
+  const handleMarkerDelete = (index, type) => {
     setDeleteButtonClicked(true);
     let updatedMarkers = [];
-    let markerId;
-
     if (type === "safe") {
       updatedMarkers = [...safeMarkers];
-      markerId = updatedMarkers[index]._id;
-
-      console.log(`Deleting safe marker ID: ${markerId}`);
-
-      if (markerId) {
-        try {
-          await axios.delete(`http://localhost:3001/safetymarkers/${markerId}`);
-        } catch (error) {
-          console.error(`Error deleting safe marker: ${error}`);
-        }
-        updatedMarkers.splice(index, 1);
-        setSafeMarkers(updatedMarkers);
-        await refreshZones();
-      } else {
-        console.error(`Safe marker ID is undefined.`);
-      }
+      updatedMarkers.splice(index, 1);
+      setSafeMarkers(updatedMarkers);
     } else if (type === "dangerous") {
       updatedMarkers = [...dangerousMarkers];
-      markerId = updatedMarkers[index]._id;
-
-      console.log(`Deleting dangerous marker ID: ${markerId}`);
-
-      if (markerId) {
-        try {
-          await axios.delete(`http://localhost:3001/dangermarkers/${markerId}`);
-        } catch (error) {
-          console.error(`Error deleting dangerous marker: ${error}`);
-        }
-        updatedMarkers.splice(index, 1);
-        setDangerousMarkers(updatedMarkers);
-        await refreshZones();
-      } else {
-        console.error(`Dangerous marker ID is undefined.`);
-      }
+      updatedMarkers.splice(index, 1);
+      setDangerousMarkers(updatedMarkers);
+    } else if (type === "itinerary") {
+      updatedMarkers = [...itineraryMarkers];
+      updatedMarkers.splice(index, 1);
+      setItineraryMarkers(updatedMarkers);
     }
     setDeleteButtonClicked(false);
   };
@@ -468,7 +442,8 @@ const MapPage = () => {
           const routeCoordinates = itinerary.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
           const routeLayer = L.polyline(routeCoordinates, { color: 'blue' }).addTo(map);
 
-          setMessage(`Itinerary calculated: ${itinerary.routes[0].legs[0].summary}`);
+          // Display message with itinerary details
+          setMessage(`Itinerary calculated:\nSummary: ${itinerary.routes[0].legs[0].summary}\nDistance: ${itinerary.routes[0].legs[0].distance} meters\nDuration: ${itinerary.routes[0].legs[0].duration} seconds`);
         } else {
           setMessage('Itinerary calculation failed.');
         }
@@ -764,6 +739,12 @@ const MapPage = () => {
     );
   };
 
+  // Function to cancel itinerary calculation
+  const cancelItineraryCalculation = () => {
+    setItineraryMarkers([]);
+    setShowDropdown(false);
+  };
+
   return (
     <div className="map-container">
       <div className="navbar">
@@ -997,6 +978,7 @@ const MapPage = () => {
               border: "1px solid #ccc",
               borderRadius: "5px",
             }}
+            onClick={() => setMessage("")}
           >
             {message}
           </div>
@@ -1051,6 +1033,7 @@ const MapPage = () => {
                 </select>
               </label>
               <button onClick={calculateAndSetItinerary}>Calculate</button>
+              <button onClick={cancelItineraryCalculation}>Cancel</button>
             </div>
           )}
         </div>
