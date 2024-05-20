@@ -4,13 +4,16 @@ import { useParams, Link } from "react-router-dom";
 import "./ViewMarkerDetails.css";
 
 const ViewMarkerDetails = () => {
-  const { id } = useParams();
+  const { coordinates } = useParams(); // Get coordinates from URL
   const [marker, setMarker] = useState(null);
   const [message, setMessage] = useState("");
 
   const fetchMarkerDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/markers/${id}`);
+      const [longitude, latitude] = coordinates.split(",");
+      const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
+        params: { longitude, latitude },
+      });
       if (response.data) {
         setMarker(response.data);
       } else {
@@ -24,7 +27,7 @@ const ViewMarkerDetails = () => {
 
   useEffect(() => {
     fetchMarkerDetails();
-  }, [id]);
+  }, [coordinates]);
 
   return (
     <div className="view-marker-details-container">
@@ -41,15 +44,13 @@ const ViewMarkerDetails = () => {
           <div className="marker-details">
             <h3>Location Details:</h3>
             <div className="marker-info">
-              <p><strong>Latitude:</strong> {marker.coordinates[1]}</p><br />
-              <p><strong>Longitude:</strong> {marker.coordinates[0]}</p><br />
-              <p><strong>Description:</strong> {marker.description}</p><br />
-              <p><strong>Place Name:</strong> {marker.place_name}</p><br />
-              <p><strong>Pinning Date:</strong> {new Date(marker.timestamp).toLocaleString()}</p><br />
+              <p><strong>Latitude:</strong> {marker.features[0].geometry.coordinates[1]}</p>
+              <p><strong>Longitude:</strong> {marker.features[0].geometry.coordinates[0]}</p>
+              <p><strong>Description:</strong> {marker.features[0].place_name}</p>
               <p><strong>Context:</strong></p>
               <ul>
-                {marker.context.map((item, index) => (
-                  <li key={index}>{item.text} ({item.wikidata || item.mapbox_id})</li>
+                {marker.features[0].context.map((item, index) => (
+                  <li key={index}>{item.text} ({item.wikidata || item.id})</li>
                 ))}
               </ul>
             </div>

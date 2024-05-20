@@ -34,9 +34,9 @@ const PopupContent = ({ title, description, position, onDelete }) => {
   useEffect(() => {
     const fetchLocationName = async () => {
       try {
-        const [latitude, longitude] = position; // Use correct order: [latitude, longitude]
+        const [latitude, longitude] = position;
         const response = await axios.get("http://localhost:3001/mapbox/reverse-geocode", {
-          params: { longitude, latitude }, // Use correct params
+          params: { longitude, latitude },
         });
         const data = response.data.features[0];
         setLocationName(data ? data.place_name : "Unknown location");
@@ -53,20 +53,15 @@ const PopupContent = ({ title, description, position, onDelete }) => {
     <div>
       <h3>{title}</h3>
       <p>Location Name: {locationName}</p>
-      <br />
-      {title === "Danger" ? (
-        <p>Danger: {description}</p>
-      ) : (
-        <p>{description}</p>
-      )}
-      <br />
+      <p>{description}</p>
       <button className="view-button">
-        <Link to={`/marker/${position[0]},${position[1]}`}>View</Link> {/* Ensure order is correct */}
+        <Link to={`/marker/${position[1]},${position[0]}`}>View</Link> {/* Ensure order is correct */}
       </button>
       <button className="delete-button" onClick={onDelete}>Delete</button>
     </div>
   );
 };
+
 
 // Custom confirmation dialog component
 const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (

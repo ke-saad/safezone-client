@@ -126,7 +126,7 @@ const ViewUpdateSafeZone = () => {
                     <tr key={index}>
                       <td>{marker.place_name || "Unknown location"}</td>
                       <td>
-                        <button type="button" className="view-button" onClick={() => navigate(`/marker/${marker._id}`)}>View</button>
+                        <button type="button" className="view-button" onClick={() => navigate(`/marker/${marker.coordinates[1]},${marker.coordinates[0]}`)}>View</button>
                         <button type="button" className="remove-button" onClick={() => removeMarker(index)}>Remove</button>
                       </td>
                     </tr>

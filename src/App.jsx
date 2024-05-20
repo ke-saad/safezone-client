@@ -52,7 +52,7 @@ function App() {
         <Route path='/viewalldangerzones' element={<ViewAllDangerZones />} />
         <Route path='/viewupdatedangerzone/:id' element={<ViewUpdateDangerZonePage />} />
         <Route path="/location/:lng/:lat" element={<LocationInfoPage />} />
-        <Route path="/marker/:id" element={<ViewMarkerDetails />} />
+        <Route path="/marker/:coordinates" element={<ViewMarkerDetails />} />
         <Route path="/activitylogs" element={<ActivityLogs />} />
         <Route path="/activitylogs/useractivitylog/:username" element={<UserActivityLog />} />
         
