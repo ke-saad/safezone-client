@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { validatePassword } from "../utils/passwordValidator"; // Import the password validator
 import "./Signup.css";
 
 const Signup = () => {
@@ -30,6 +31,13 @@ const Signup = () => {
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError(
+        "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+      );
       return;
     }
 

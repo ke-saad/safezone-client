@@ -27,6 +27,7 @@ import ViewMarkerDetails from './components/ViewMarkerDetails/ViewMarkerDetails'
 import ActivityLogs from './components/ActivityLogs/ActivityLogs';
 import UserActivityLog from './components/UserActivityLog/UserActivityLog';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import AccountManagementPage from './components/AccountManagementPage/AccountManagementPage';
 
 function App() {
   return (
@@ -45,6 +46,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/account'
+          element={
+            <ProtectedRoute>
+              <AccountManagementPage />
             </ProtectedRoute>
           }
         />
