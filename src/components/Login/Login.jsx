@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { IoMdPerson, IoMdLock, IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Input, Button, Typography, Card } from "@material-tailwind/react";
+import SuccessModal from '../Modals/SuccessModal';
+import ErrorModal from '../Modals/ErrorModal';
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const toggleShowPassword = () => setShowPassword(!showPassword);
@@ -22,84 +26,90 @@ const Login = () => {
       });
       const token = response.data.token;
       localStorage.setItem("token", token);
-      setError("");
-      navigate("/admindashboard");
-    } catch (error) {
-      setError("Invalid username or password");
+      setIsSuccessModalOpen(true);
       setTimeout(() => {
-        setError("");
+        setIsSuccessModalOpen(false);
+        navigate("/admindashboard");
+      }, 3000);
+    } catch (error) {
+      setErrorMessage("Invalid username or password");
+      setIsErrorModalOpen(true);
+      setTimeout(() => {
+        setIsErrorModalOpen(false);
+        setErrorMessage("");
       }, 3000);
     }
   };
 
   return (
-    <section
-      className="flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: 'url(/world_map.jpg)' }}
-    >
-<div className="navbar flex justify-between w-full p-4 bg-gray-800 shadow-md">
-  <Link to="/login" className="text-white py-2 px-4 w-1/2 text-center rounded hover:bg-gray-700 transition">
-    Login
-  </Link>
-  <Link to="/aboutus" className="text-white py-2 px-4 w-1/2 text-center rounded hover:bg-gray-700 transition">
-    About Us
-  </Link>
-</div>
-
-      <Card className="w-full max-w-md p-10 rounded-lg bg-white bg-opacity-90 shadow-lg">
-        <div className="text-center mb-8">
-          <img src="/public/Logo1.png" alt="Logo" className="mx-auto h-24 w-auto mb-4"/>
-          <Typography variant="h4" className="font-bold text-black">Sign In</Typography>
-        </div>
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-        <form className="w-full" onSubmit={handleSubmit}>
-          <div className="mb-6">
-          <Typography variant="small" className="font-medium text-black mb-2 block pr-96">Username</Typography>
-            <div className="relative">
-              <IoMdPerson size={24} className="absolute left-3 inset-y-0 my-auto text-black" />
-              <Input
-                id="username"
-                name="username"
-                size="lg"
-                placeholder="Username"
-                className="pl-12 border border-gray-300 rounded-lg w-full h-12"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
+    <>
+      <SuccessModal 
+        isOpen={isSuccessModalOpen} 
+        onClose={() => setIsSuccessModalOpen(false)} 
+        successMessage="Login successful! Redirecting..."
+      />
+      <ErrorModal 
+        isOpen={isErrorModalOpen} 
+        onClose={() => setIsErrorModalOpen(false)} 
+        errorMessage={errorMessage}
+      />
+      <section
+        className="flex items-center justify-center min-h-screen bg-cover bg-center"
+        style={{ backgroundImage: 'url(/Map.png)' }}
+      >
+        <Card className="w-full max-w-md p-10 rounded-lg bg-white bg-opacity-90 shadow-lg">
+          <form className="w-full" onSubmit={handleSubmit}>
+            <div className="text-center mb-6">
+              <img src="/Logo1.png" alt="Logo" className="mx-auto mb-4 w-28 h-28" />
+              <Typography variant="h4" className="font-bold text-4xl font-serif  text-black">Login</Typography>
             </div>
-          </div>
-          <div className="mb-6">
-            <Typography variant="small" className="font-medium text-black mb-2 block pr-96">Password</Typography>
-            <div className="relative">
-              <IoMdLock size={24} className="absolute left-3 inset-y-0 my-auto text-black" />
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                size="lg"
-                placeholder="Password"
-                className="pl-12 border border-gray-300 rounded-lg w-full h-12"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                {showPassword ? (
-                  <IoMdEyeOff size={24} onClick={toggleShowPassword} className="cursor-pointer text-gray-400" />
-                ) : (
-                  <IoMdEye size={24} onClick={toggleShowPassword} className="cursor-pointer text-gray-400" />
-                )}
+            <div className="mb-6">
+              <Typography variant="h4" className="font-medium text-black mb-2 pr-96">Username</Typography>
+              <div className="relative">
+                <IoMdPerson size={24} className="absolute  left-3 inset-y-0 my-auto text-black pointer-events-none" />
+                <Input
+                  id="username"
+                  name="username"
+                  size="lg"
+                  placeholder="Username"
+                  className="pl-12 border text-black border-gray-300  bg-transparent rounded-lg w-full h-12 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
               </div>
             </div>
-          </div>
-          <div className="text-right mb-6">
-            <Button type="submit" className="mb-6 bg-black text-white p-3 rounded-lg" fullWidth>
-              Sign In
-            </Button>
-          </div>
-        
-        </form>
-      </Card>
-    </section>
+            <div className="mb-6">
+              <Typography variant="h4" className="font-medium text-black mb-2 pr-96">Password</Typography>
+              <div className="relative">
+                <IoMdLock size={24} className="absolute left-3 inset-y-0 my-auto text-black pointer-events-none" />
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  size="lg"
+                  placeholder="Password"
+                  className="pl-12 border text-black border-gray-300 bg-transparent rounded-lg w-full h-12 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  {showPassword ? (
+                    <IoMdEyeOff size={24} onClick={toggleShowPassword} className="cursor-pointer text-black" />
+                  ) : (
+                    <IoMdEye size={24} onClick={toggleShowPassword} className="cursor-pointer text-black" />
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="text-right mb-6">
+              <Button type="submit" className="mb-6 bg-black text-white p-3 rounded-lg" fullWidth>
+                Sign In
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </section>
+    </>
   );
 };
 
