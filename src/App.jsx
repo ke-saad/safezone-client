@@ -1,3 +1,5 @@
+// src/App.jsx
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Signup from './components/Signup/Signup';
 import Login from './components/Login/Login';
@@ -19,45 +21,169 @@ import ViewUpdateSafeZone from './components/ViewUpdateSafeZone/ViewUpdateSafeZo
 import DangerZoneManagingPage from './components/DangerZoneManagingPage/DangerZoneManagingPage';
 import AddDangerZonePage from './components/AddDangerZonePage/AddDangerZonePage';
 import ViewAllDangerZones from './components/ViewAllDangerZones/ViewAllDangerZones';
-import ViewUpdateDangerZonePage from './components/ViewUpdateDangerZonePage/ViewUpdateDangerZonePage';
+import ViewUpdateDangerZonePage from './components/ViewUpdateDangerZone/ViewUpdateDangerZonePage';
 import LocationInfoPage from './components/LocationInfoPage/LocationInfoPage';
 import ViewMarkerDetails from './components/ViewMarkerDetails/ViewMarkerDetails';
 import ActivityLogs from './components/ActivityLogs/ActivityLogs';
 import UserActivityLog from './components/UserActivityLog/UserActivityLog';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/register' element={<Signup />} />
+        <Route path='/register' element={<ProtectedRoute><Signup /></ProtectedRoute>} />
         <Route path='/login' element={<Login />} />
         <Route path="/aboutus" element={<Aboutus />} />
         <Route path='/' element={<Home />} />
-        <Route path='/map' element={<MapPage />} />
+        <Route path='/map' element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
         <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route path='*' element={<Navigate to='/not-found' />} />
         <Route path='/not-found' element={<NotFound />} />
-        <Route path='/admindashboard' element={<AdminDashboard />} />
-        <Route path='/accessdenied' element={<AccessDenied />} />
-        <Route path='/users-managing' element={<UsersManagingPage />} />
-        <Route path='/viewallusers' element={<ViewAllUsers />} />
-        <Route path='/updateviewauser' element={<UpdateViewAUser />} />
-        <Route path='/userinformation/:userId' element={<UserInformation />} />
-        <Route path='/safezonesmanagingpage' element={<SafeZoneManagingPage />} />
-        <Route path='/addsafezone' element={<AddSafeZonePage />} />
-        <Route path='/viewallsafezones' element={<ViewAllSafeZones />} />
-        <Route path='/viewupdatesafezone/:id' element={<ViewUpdateSafeZone />} />
-        <Route path='/dangerzonesmanagingpage' element={<DangerZoneManagingPage />} />
-        <Route path='/adddangerzone' element={<AddDangerZonePage />} />
-        <Route path='/viewalldangerzones' element={<ViewAllDangerZones />} />
-        <Route path='/viewupdatedangerzone/:id' element={<ViewUpdateDangerZonePage />} />
-        <Route path="/location/:lng/:lat" element={<LocationInfoPage />} />
-        <Route path="/marker/:coordinates" element={<ViewMarkerDetails />} />
-        <Route path="/activitylogs" element={<ActivityLogs />} />
-        <Route path="/activitylogs/useractivitylog/:username" element={<UserActivityLog />} />
-        
-        
-
+        <Route
+          path='/admindashboard'
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/accessdenied'
+          element={
+            <ProtectedRoute>
+              <AccessDenied />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/users-managing'
+          element={
+            <ProtectedRoute>
+              <UsersManagingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/viewallusers'
+          element={
+            <ProtectedRoute>
+              <ViewAllUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/updateviewauser'
+          element={
+            <ProtectedRoute>
+              <UpdateViewAUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/userinformation/:userId'
+          element={
+            <ProtectedRoute>
+              <UserInformation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/safezonesmanagingpage'
+          element={
+            <ProtectedRoute>
+              <SafeZoneManagingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/addsafezone'
+          element={
+            <ProtectedRoute>
+              <AddSafeZonePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/viewallsafezones'
+          element={
+            <ProtectedRoute>
+              <ViewAllSafeZones />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/viewupdatesafezone/:id'
+          element={
+            <ProtectedRoute>
+              <ViewUpdateSafeZone />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/dangerzonesmanagingpage'
+          element={
+            <ProtectedRoute>
+              <DangerZoneManagingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/adddangerzone'
+          element={
+            <ProtectedRoute>
+              <AddDangerZonePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/viewalldangerzones'
+          element={
+            <ProtectedRoute>
+              <ViewAllDangerZones />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/viewupdatedangerzone/:id'
+          element={
+            <ProtectedRoute>
+              <ViewUpdateDangerZonePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/location/:lng/:lat'
+          element={
+            <ProtectedRoute>
+              <LocationInfoPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/marker/:coordinates'
+          element={
+            <ProtectedRoute>
+              <ViewMarkerDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/activitylogs'
+          element={
+            <ProtectedRoute>
+              <ActivityLogs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/activitylogs/useractivitylog/:username'
+          element={
+            <ProtectedRoute>
+              <UserActivityLog />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

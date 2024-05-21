@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/components/Login/Login.js
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 import axios from "axios";
@@ -9,6 +10,13 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/admindashboard");
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -18,7 +26,6 @@ const Login = () => {
       });
       const token = response.data.token;
       localStorage.setItem("token", token);
-      console.log("Token stored:", token); // Log the token to verify storage
       setError("");
       navigate("/admindashboard");
     } catch (error) {
