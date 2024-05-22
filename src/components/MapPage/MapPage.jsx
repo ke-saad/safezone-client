@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   MapContainer,
   TileLayer,
@@ -77,6 +77,7 @@ const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
 // Main MapPage component
 const MapPage = () => {
   const navigate = useNavigate(); // To navigate to different pages
+  const location = useLocation(); // To access query parameters
   const [safeMarkers, setSafeMarkers] = useState([]);
   const [dangerousMarkers, setDangerousMarkers] = useState([]);
   const [itineraryMarkers, setItineraryMarkers] = useState([]);
@@ -110,6 +111,11 @@ const MapPage = () => {
   });
   const [showDropdown, setShowDropdown] = useState(false); // State to control dropdown visibility
   const [itineraryInfo, setItineraryInfo] = useState(null); // State to store itinerary information
+
+  // Extract query parameters from the URL
+  const queryParams = new URLSearchParams(location.search);
+  const zoneType = queryParams.get("zoneType");
+  const zoneId = queryParams.get("id");
 
   // Function to add marker to the database
   const addMarkerToDatabase = async (marker, zoneType) => {
@@ -211,7 +217,58 @@ const MapPage = () => {
     }
   };
 
-  // Function to fetch safe zones from the server
+  // Function to fetch a specific zone from the server
+  const fetchZoneById = async (zoneType, id) => {
+    try {
+      const endpoint =
+        zoneType === "safe"
+          ? `http://localhost:3001/safezones/${id}`
+          : `http://localhost:3001/dangerzones/${id}`;
+      const response = await axios.get(endpoint);
+      const zone = response.data;
+
+      const markersFromZone = zone.markers.map((marker) => ({
+        position: marker.coordinates,
+        description: marker.description || "No description provided",
+        _id: marker._id,
+        zone: { _id: zone._id }, // Store the parent zone ID in the marker
+        timestamp: marker.timestamp,
+        locationName: zone.locationName, // Store the location name
+        ...(zoneType === "danger" && { exception: marker.exception || "" }), // Include exception attribute for danger markers
+      }));
+
+      if (zoneType === "safe") {
+        setSafeMarkers(markersFromZone);
+      } else {
+        setDangerousMarkers(markersFromZone);
+        const descriptionsMap = {};
+        markersFromZone.forEach((marker) => {
+          const key = `${marker.position[0]},${marker.position[1]}`;
+          descriptionsMap[key] = marker.description;
+        });
+        setDangerousDescriptions(descriptionsMap);
+      }
+
+      const points = zone.markers.map((marker) => turf.point([marker.coordinates[1], marker.coordinates[0]]));
+      const featureCollection = turf.featureCollection(points);
+      const hull = turf.convex(featureCollection);
+      if (hull) {
+        hull.properties = { zoneType, zoneId: zone._id }; // Add properties to the GeoJSON feature
+      }
+
+      if (zoneType === "safe") {
+        setSafeGeoJsonLayers([hull]);
+      } else {
+        setDangerousGeoJsonLayers([hull]);
+      }
+
+      console.log(`${zoneType} zone fetched successfully:`, zone);
+    } catch (error) {
+      console.error(`Error fetching ${zoneType} zone:`, error);
+    }
+  };
+
+  // Function to fetch all safe zones from the server
   const fetchSafeZones = async () => {
     try {
       const response = await axios.get("http://localhost:3001/safezones");
@@ -283,7 +340,7 @@ const MapPage = () => {
     }
   };
 
-  // Function to fetch dangerous zones from the server
+  // Function to fetch all dangerous zones from the server
   const fetchDangerousZones = async () => {
     try {
       const response = await axios.get("http://localhost:3001/dangerzones");
@@ -366,9 +423,15 @@ const MapPage = () => {
 
   // useEffect to fetch zones on component mount
   useEffect(() => {
-    fetchSafeZones();
-    fetchDangerousZones();
-  }, []);
+    if (zoneType && zoneId) {
+      // Fetch the specific zone by ID
+      fetchZoneById(zoneType, zoneId);
+    } else {
+      // Fetch all zones
+      fetchSafeZones();
+      fetchDangerousZones();
+    }
+  }, [zoneType, zoneId]);
 
   // Function to refresh zones after deletion
   const refreshZones = async () => {

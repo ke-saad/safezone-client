@@ -100,7 +100,7 @@ const ViewUpdateSafeZone = () => {
   }, [id]);
 
   return (
-    <div className="view-update-danger-zone-container">
+    <div className="view-update-safe-zone-container">
       <div className="navbar">
         <Link to="/" className="nav-link">Home</Link>
         <Link to="/admindashboard" className="nav-link">Dashboard</Link>
@@ -111,7 +111,7 @@ const ViewUpdateSafeZone = () => {
         <h2 className="title">View / Update Safe Zone</h2>
         {message && <div className="message">{message}</div>}
         {safeZone ? (
-          <form onSubmit={updateSafeZone} className="update-danger-zone-form">
+          <form onSubmit={updateSafeZone} className="update-safe-zone-form">
             <h3>Markers:</h3>
             <div className="table-container">
               <table className="markers-table">
@@ -137,6 +137,7 @@ const ViewUpdateSafeZone = () => {
             <div className="button-group">
               <button type="button" className="add-button" onClick={() => setShowAddMarkerDialog(true)}>Add Marker</button>
               <button type="submit" className="update-button">Update Safe Zone</button>
+              <button type="button" className="view-map-button" onClick={() => navigate(`/map?zoneType=safe&id=${id}`)}>View on Map</button>
             </div>
           </form>
         ) : (

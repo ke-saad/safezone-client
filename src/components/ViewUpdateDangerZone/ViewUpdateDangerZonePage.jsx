@@ -137,6 +137,7 @@ const ViewUpdateDangerZone = () => {
             <div className="button-group">
               <button type="button" className="add-button" onClick={() => setShowAddMarkerDialog(true)}>Add Marker</button>
               <button type="submit" className="update-button">Update Danger Zone</button>
+              <button type="button" className="view-map-button" onClick={() => navigate(`/map?zoneType=danger&id=${id}`)}>View on Map</button>
             </div>
           </form>
         ) : (
