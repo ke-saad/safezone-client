@@ -1,6 +1,7 @@
+//MapPage.jsx:
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   MapContainer,
   TileLayer,
@@ -9,11 +10,13 @@ import {
   Popup,
   ZoomControl,
   GeoJSON,
+  Polyline // Import Polyline component from react-leaflet
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapPage.css";
 import * as turf from "@turf/turf";
+import polyline from '@mapbox/polyline';  // Import polyline decoding library
 
 // Import marker icons
 import blueMarker from "../Images/blue_marker.png";
@@ -62,7 +65,6 @@ const PopupContent = ({ title, description, position, onDelete }) => {
   );
 };
 
-
 // Custom confirmation dialog component
 const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
   <div className="confirmation-dialog">
@@ -76,6 +78,7 @@ const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
 // Main MapPage component
 const MapPage = () => {
   const navigate = useNavigate(); // To navigate to different pages
+  const location = useLocation(); // To access query parameters
   const [safeMarkers, setSafeMarkers] = useState([]);
   const [dangerousMarkers, setDangerousMarkers] = useState([]);
   const [itineraryMarkers, setItineraryMarkers] = useState([]);
@@ -98,6 +101,7 @@ const MapPage = () => {
   const [selectedLayer, setSelectedLayer] = useState(null); // To handle selected GeoJSON layer
   const [zones, setZones] = useState([]); // To store all zone information
   const [completedZones, setCompletedZones] = useState([]); // To track completed zones
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [itineraryOptions, setItineraryOptions] = useState({
     profile: "driving",
     alternatives: "false",
@@ -107,6 +111,12 @@ const MapPage = () => {
     voice_instructions: "false"
   });
   const [showDropdown, setShowDropdown] = useState(false); // State to control dropdown visibility
+  const [itineraryInfo, setItineraryInfo] = useState(null); // State to store itinerary information
+
+  // Extract query parameters from the URL
+  const queryParams = new URLSearchParams(location.search);
+  const zoneType = queryParams.get("zoneType");
+  const zoneId = queryParams.get("id");
 
   // Function to add marker to the database
   const addMarkerToDatabase = async (marker, zoneType) => {
@@ -208,7 +218,58 @@ const MapPage = () => {
     }
   };
 
-  // Function to fetch safe zones from the server
+  // Function to fetch a specific zone from the server
+  const fetchZoneById = async (zoneType, id) => {
+    try {
+      const endpoint =
+        zoneType === "safe"
+          ? `http://localhost:3001/safezones/${id}`
+          : `http://localhost:3001/dangerzones/${id}`;
+      const response = await axios.get(endpoint);
+      const zone = response.data;
+
+      const markersFromZone = zone.markers.map((marker) => ({
+        position: marker.coordinates,
+        description: marker.description || "No description provided",
+        _id: marker._id,
+        zone: { _id: zone._id }, // Store the parent zone ID in the marker
+        timestamp: marker.timestamp,
+        locationName: zone.locationName, // Store the location name
+        ...(zoneType === "danger" && { exception: marker.exception || "" }), // Include exception attribute for danger markers
+      }));
+
+      if (zoneType === "safe") {
+        setSafeMarkers(markersFromZone);
+      } else {
+        setDangerousMarkers(markersFromZone);
+        const descriptionsMap = {};
+        markersFromZone.forEach((marker) => {
+          const key = `${marker.position[0]},${marker.position[1]}`;
+          descriptionsMap[key] = marker.description;
+        });
+        setDangerousDescriptions(descriptionsMap);
+      }
+
+      const points = zone.markers.map((marker) => turf.point([marker.coordinates[1], marker.coordinates[0]]));
+      const featureCollection = turf.featureCollection(points);
+      const hull = turf.convex(featureCollection);
+      if (hull) {
+        hull.properties = { zoneType, zoneId: zone._id }; // Add properties to the GeoJSON feature
+      }
+
+      if (zoneType === "safe") {
+        setSafeGeoJsonLayers([hull]);
+      } else {
+        setDangerousGeoJsonLayers([hull]);
+      }
+
+      console.log(`${zoneType} zone fetched successfully:`, zone);
+    } catch (error) {
+      console.error(`Error fetching ${zoneType} zone:`, error);
+    }
+  };
+
+  // Function to fetch all safe zones from the server
   const fetchSafeZones = async () => {
     try {
       const response = await axios.get("http://localhost:3001/safezones");
@@ -280,7 +341,7 @@ const MapPage = () => {
     }
   };
 
-  // Function to fetch dangerous zones from the server
+  // Function to fetch all dangerous zones from the server
   const fetchDangerousZones = async () => {
     try {
       const response = await axios.get("http://localhost:3001/dangerzones");
@@ -363,9 +424,15 @@ const MapPage = () => {
 
   // useEffect to fetch zones on component mount
   useEffect(() => {
-    fetchSafeZones();
-    fetchDangerousZones();
-  }, []);
+    if (zoneType && zoneId) {
+      // Fetch the specific zone by ID
+      fetchZoneById(zoneType, zoneId);
+    } else {
+      // Fetch all zones
+      fetchSafeZones();
+      fetchDangerousZones();
+    }
+  }, [zoneType, zoneId]);
 
   // Function to refresh zones after deletion
   const refreshZones = async () => {
@@ -390,9 +457,7 @@ const MapPage = () => {
       updatedMarkers.splice(index, 1);
       setDangerousMarkers(updatedMarkers);
     } else if (type === "itinerary") {
-      updatedMarkers = [...itineraryMarkers];
-      updatedMarkers.splice(index, 1);
-      setItineraryMarkers(updatedMarkers);
+      setItineraryMarkers([]);
     }
     setDeleteButtonClicked(false);
   };
@@ -400,25 +465,28 @@ const MapPage = () => {
   // Function to delete all markers in a zone
   const handleZoneDelete = async (zoneId, zoneType) => {
     try {
-      // Fetch all markers for the zone
-      const markersResponse = await axios.get(`http://localhost:3001/${zoneType}zones/${zoneId}`);
-      const markers = markersResponse.data.markers;
-
-      // Delete each marker
-      for (const marker of markers) {
-        await axios.delete(`http://localhost:3001/${zoneType}markers/${marker._id}`);
+      const endpoint =
+        zoneType === "safe"
+          ? `http://localhost:3001/safezones/${zoneId}`
+          : `http://localhost:3001/dangerzones/${zoneId}`;
+  
+      // Send DELETE request to the appropriate endpoint
+      const response = await axios.delete(endpoint);
+  
+      if (response.data.success) {
+        // Remove the zone from completed zones
+        setCompletedZones((prev) => prev.filter((id) => id !== zoneId));
+  
+        // Refresh zones after deletion
+        await refreshZones();
+      } else {
+        console.error(`Error deleting ${zoneType} zone:`, response.data.message);
       }
-
-      // Remove the zone from completed zones
-      setCompletedZones((prev) => prev.filter((id) => id !== zoneId));
-
-      // Refresh zones after deletion
-      await refreshZones();
     } catch (error) {
-      console.error(`Error deleting markers for ${zoneType} zone:`, error);
+      console.error(`Error deleting ${zoneType} zone:`, error);
     }
   };
-
+  
   // Function to calculate and set itinerary
   const calculateAndSetItinerary = async () => {
     if (itineraryMarkers.length === 2) {
@@ -429,18 +497,38 @@ const MapPage = () => {
           endCoordinates: end.position,
           profile: itineraryOptions.profile // Use only the profile parameter
         });
-
+  
         const itinerary = response.data.itinerary;
-
+  
         if (itinerary && itinerary.routes && itinerary.routes.length > 0) {
-          // Display the itinerary on the map
-          const routeCoordinates = itinerary.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-          const routeLayer = L.polyline(routeCoordinates, { color: 'blue' }).addTo(map);
-
+          // Decode the polyline geometry
+          const routeCoordinates = polyline.decode(itinerary.routes[0].geometry);
+          const routeLatLngs = routeCoordinates.map(coord => ({ lat: coord[0], lng: coord[1] }));
+  
+          // Set the route coordinates state
+          setRouteCoordinates(routeLatLngs);
+  
+          // Log the itinerary response to the console
+          console.log('Itinerary calculated:', itinerary);
+  
           // Display message with itinerary details
-          setMessage(`Itinerary calculated:\nSummary: ${itinerary.routes[0].legs[0].summary}\nDistance: ${itinerary.routes[0].legs[0].distance} meters\nDuration: ${itinerary.routes[0].legs[0].duration} seconds`);
+          setItineraryInfo({
+            profile: itineraryOptions.profile,
+            distance: itinerary.routes[0].legs[0].distance,
+            duration: itinerary.routes[0].legs[0].duration,
+            startName: start.locationName,
+            endName: end.locationName,
+            summary: itinerary.routes[0].legs[0].summary
+          });
+  
+          // Center the map around the starting point of the itinerary
+          if (map) map.setView([start.position[0], start.position[1]], 13);
+  
+          // Close the itinerary calculation modal
+          setShowDropdown(false);
         } else {
           setMessage('Itinerary calculation failed.');
+          console.log('Itinerary calculation failed:', itinerary);
         }
       } catch (error) {
         console.error('Error calculating itinerary:', error);
@@ -492,8 +580,8 @@ const MapPage = () => {
           response.data.features[0]?.place_name || "Unknown location";
         setYellowMarkerInfo({ locationName });
 
-        // Check if map is defined before using flyTo
-        if (map) map.flyTo([latitudeResult, longitudeResult], 13);
+        // Check if map is defined before using setView
+        if (map) map.setView([latitudeResult, longitudeResult], 13);
       } catch (error) {
         console.error("Error fetching location name:", error);
       }
@@ -552,14 +640,12 @@ const MapPage = () => {
   };
 
  // Function to handle GeoJSON layer click event
-const handleLayerClick = (e, layer) => {
+ const handleLayerClick = (e, layer) => {
   const zoneId = layer.feature.properties.zoneId; // Use zoneId to identify zone
   const zoneType = layer.feature.properties.zoneType;
   setSelectedLayer({ zoneId, zoneType, latlng: e.latlng });
 };
-
-
-  // Function to show GeoJSON layer confirmation dialog
+// Function to show GeoJSON layer confirmation dialog
 const showLayerConfirmationDialog = () => {
   const { zoneId, zoneType } = selectedLayer;
   return (
@@ -567,7 +653,7 @@ const showLayerConfirmationDialog = () => {
       message={`What would you like to do with this ${zoneType} zone?`}
       onConfirm={async (choice) => {
         if (choice === "delete") {
-          // Delete all markers in the zone
+          // Delete the zone
           await handleZoneDelete(zoneId, zoneType);
         } else if (choice === "view") {
           // Fetch the zone ID from the database and navigate to the view page
@@ -586,7 +672,6 @@ const showLayerConfirmationDialog = () => {
     />
   );
 };
-
 
   // MapEvents component to handle map events
   const MapEvents = () => {
@@ -676,6 +761,9 @@ const showLayerConfirmationDialog = () => {
                 newMarker.locationName = locationName;
 
                 setItineraryMarkers((prev) => [...prev, newMarker]);
+                if (itineraryMarkers.length === 1) {
+                  setActiveAction(null); // Deactivate blue marker pinning after two markers are pinned
+                }
               } catch (error) {
                 console.error("Error fetching location name:", error);
               }
@@ -875,6 +963,10 @@ const showLayerConfirmationDialog = () => {
               </Popup>
             </Marker>
           ))}
+          {/* Render the calculated route */}
+          {routeCoordinates.length > 0 && (
+            <Polyline positions={routeCoordinates} color="#2A629A" />
+          )}
           {/* Render yellow marker for search results */}
           {yellowMarkerPosition && (
             <Marker
@@ -928,7 +1020,6 @@ const showLayerConfirmationDialog = () => {
               }}
             />
           ))}
-
           {dangerousGeoJsonLayers.map((layer, index) => (
             <GeoJSON
               key={`dangerous-layer-${index}`}
@@ -1119,6 +1210,18 @@ const showLayerConfirmationDialog = () => {
       </div>
       {confirmationDialog}
       {selectedLayer && showLayerConfirmationDialog()}
+      {/* Display itinerary info */}
+      {itineraryInfo && (
+        <div className="itinerary-info">
+          <h4>Itinerary Information</h4>
+          <p><strong>Profile:</strong> {itineraryInfo.profile}</p>
+          <p><strong>Distance:</strong> {(itineraryInfo.distance / 1000).toFixed(2)} Kilometers</p>
+          <p><strong>Duration:</strong> {(itineraryInfo.duration /3600).toFixed(2) } Hours</p>
+          <p><strong>Start:</strong> {itineraryInfo.startName}</p>
+          <p><strong>End:</strong> {itineraryInfo.endName}</p>
+          <button onClick={() => setItineraryInfo(null)}>Close</button>
+        </div>
+      )}
     </div>
   );
 };

@@ -18,4 +18,15 @@ module.exports = {
       { allowConstantExport: true },
     ],
   },
+  overrides: [
+    {
+      files: ['*.cjs'],
+      env: {
+        node: true,
+      },
+      rules: {
+        'no-undef': 'off',
+      },
+    },
+  ],
 }
