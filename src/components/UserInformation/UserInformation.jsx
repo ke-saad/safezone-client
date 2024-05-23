@@ -87,8 +87,8 @@ const UserInformation = () => {
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center p-5 text-gray-800">
-      <div className="absolute top-0 left-0 w-full h-full bg-cover bg-center z-[-1]" style={{ backgroundImage: "url('/Map.png')" }}></div>
+    <div className="relative w-full h-screen flex items-center justify-center p-5 text-gray-800">
+      <div className="fixed top-0 left-0 w-full h-full bg-cover bg-center z-[-1]" style={{ backgroundImage: "url('/Map.png')" }}></div>
       <div className="navbar flex justify-between w-full p-4 bg-black shadow-md mb-6">
         <Link to="/viewallusers" className="text-white py-2 px-4 w-1/2 text-center rounded hover:text-black hover:bg-gray-300 transition">
           View All Users

@@ -39,21 +39,19 @@ const ActivityLogs = () => {
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full p-5 relative text-gray-800">
-      <div className="absolute top-0 left-0 w-full h-full bg-cover bg-center z-[-1]" style={{ backgroundImage: "url('/Map.png')" }}></div>
+      <div className="fixed  top-0 left-0 w-full h-full bg-cover bg-center z-[-1]" style={{ backgroundImage: "url('/Map.png')" }}></div>
       <div className="navbar flex justify-between w-full p-4 bg-black shadow-md">
 
-          <Link to="/admindashboard" className="text-white py-2 px-4 w-1/3 text-center rounded hover:text-black hover:bg-gray-300 transition">
+          <Link to="/admindashboard" className="text-white py-2 px-4 w-1/2 text-center rounded hover:text-black hover:bg-gray-300 transition">
             Dashboard
           </Link>
-          <Link to="/viewallusers" className="text-white py-2 px-4 w-1/3 text-center rounded hover:text-black hover:bg-gray-300 transition">
+          <Link to="/viewallusers" className="text-white py-2 px-4 w-1/2 text-center rounded hover:text-black hover:bg-gray-300 transition">
             Users Management
           </Link>
-          <Link to="/login" className="text-white py-2 px-4 w-1/3 text-center rounded hover:text-black hover:bg-gray-300 transition">
-            Logout
-          </Link>
+
         </div>
 
-      <h2 className="text-4xl font-bold mt-12 mb-6 text-gray-900 shadow-lg px-4 py-2 rounded bg-white bg-opacity-80 border-b-4 b">
+      <h2 className="text-4xl font-bold mt-36 mb-6 text-gray-900 shadow-lg px-4 py-2 rounded bg-white bg-opacity-80 border-b-4 b">
         Activity Logs
       </h2>
       <div className="w-3/5 bg-white rounded-lg shadow-lg mt-2">

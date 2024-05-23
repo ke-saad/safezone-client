@@ -11,10 +11,7 @@ import AccessDenied from './components/AccessDenied/AccessDenied';
 import ViewAllUsers from './components/ViewAllUsers/ViewAllUsers';
 import UserInformation from './components/UserInformation/UserInformation';
 import ViewAllSafeZones from './components/ViewAllSafeZones/ViewAllSafeZones';
-import DangerZoneManagingPage from './components/DangerZoneManagingPage/DangerZoneManagingPage';
-import AddDangerZonePage from './components/AddDangerZonePage/AddDangerZonePage';
 import ViewAllDangerZones from './components/ViewAllDangerZones/ViewAllDangerZones';
-import ViewUpdateDangerZonePage from './components/ViewUpdateDangerZone/ViewUpdateDangerZonePage';
 import LocationInfoPage from './components/LocationInfoPage/LocationInfoPage';
 import ViewMarkerDetails from './components/ViewMarkerDetails/ViewMarkerDetails';
 import ActivityLogs from './components/ActivityLogs/ActivityLogs';
@@ -70,36 +67,11 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        <Route
-          path='/dangerzonesmanagingpage'
-          element={
-            <ProtectedRoute>
-              <DangerZoneManagingPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path='/adddangerzone'
-          element={
-            <ProtectedRoute>
-              <AddDangerZonePage />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path='/viewalldangerzones'
           element={
             <ProtectedRoute>
               <ViewAllDangerZones />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path='/viewupdatedangerzone/:id'
-          element={
-            <ProtectedRoute>
-              <ViewUpdateDangerZonePage />
             </ProtectedRoute>
           }
         />

@@ -121,7 +121,7 @@ const Signup = () => {
                   name="username"
                   size="lg"
                   placeholder="Username"
-                  className="pl-12 border text-black border-gray-300 bg-transparent rounded-lg w-full h-14 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-12 border text-black border-gray-300 bg-transparent rounded-lg w-full h-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -137,7 +137,7 @@ const Signup = () => {
                   type={showPassword ? 'text' : 'password'}
                   size="lg"
                   placeholder="Password"
-                  className="pl-12 border text-black border-gray-300 bg-transparent rounded-lg w-full h-14 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-12 border text-black border-gray-300 bg-transparent rounded-lg w-full h-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -160,7 +160,7 @@ const Signup = () => {
                   type={showConfirmPassword ? 'text' : 'password'}
                   size="lg"
                   placeholder="Confirm Password"
-                  className="pl-12 border text-black border-gray-300 bg-transparent rounded-lg w-full h-14 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-12 border text-black border-gray-300 bg-transparent rounded-lg w-full h-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />

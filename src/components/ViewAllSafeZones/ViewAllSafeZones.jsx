@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FaPlus, FaTrashAlt, FaInfoCircle } from 'react-icons/fa';
 import AddSafeZoneModal from "../Modals/AddSafeZoneModal";  // Assurez-vous que ce chemin est correct
 import ViewUpdateSafeZoneModal from "../Modals/ViewUpdateSafeZoneModal";  // Assurez-vous que ce chemin est correct
+import DeleteConfirmationDialog from "../Modals/DeleteConfirmationDialog";  // Assurez-vous que ce chemin est correct
 
 const ViewAllSafeZones = () => {
   const [safeZones, setSafeZones] = useState([]);
@@ -12,6 +13,7 @@ const ViewAllSafeZones = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [selectedZoneId, setSelectedZoneId] = useState(null);
   const safeZonesPerPage = 5;
 
@@ -40,11 +42,17 @@ const ViewAllSafeZones = () => {
     setIsUpdateModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
+    setSelectedZoneId(id);
+    setIsConfirmationModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:3001/safezones/${id}`);
-      setSafeZones(safeZones.filter(safeZone => safeZone._id !== id));
-      setFilteredSafeZones(filteredSafeZones.filter(safeZone => safeZone._id !== id));
+      await axios.delete(`http://localhost:3001/safezones/${selectedZoneId}`);
+      setSafeZones(safeZones.filter(safeZone => safeZone._id !== selectedZoneId));
+      setFilteredSafeZones(filteredSafeZones.filter(safeZone => safeZone._id !== selectedZoneId));
+      setIsConfirmationModalOpen(false);
     } catch (error) {
       setError("Failed to delete safe zone.");
     }
@@ -62,6 +70,10 @@ const ViewAllSafeZones = () => {
     setIsUpdateModalOpen(false);
   };
 
+  const closeConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
+  };
+
   const handleSave = () => {
     setIsAddModalOpen(false);
     setIsUpdateModalOpen(false);
@@ -76,20 +88,19 @@ const ViewAllSafeZones = () => {
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full p-5 relative text-gray-800">
-      <div className="absolute top-0 left-0 w-full h-full bg-cover bg-center z-[-1]" style={{ backgroundImage: "url('/Map.png')" }}></div>
+      <div className="fixed top-0 left-0 w-full h-full bg-cover bg-center z-[-1]" style={{ backgroundImage: "url('/Map.png')" }}></div>
       <div className="navbar flex justify-between w-full p-4 bg-black shadow-md">
-
         <Link to="/admindashboard" className="text-white py-2 px-4 w-1/3 text-center rounded hover:text-black hover:bg-gray-300 transition">
           Dashboard
         </Link>
         <Link to="/map" className="text-white py-2 px-4 w-1/3 text-center rounded hover:text-black hover:bg-gray-300 transition">
           Map
         </Link>
-        <Link to="/login" className="text-white py-2 px-4 w-1/3 text-center rounded hover:text-black hover:bg-gray-300 transition">
-          Logout
+        <Link to="/viewalldangerzones" className="text-white py-2 px-4 w-1/3 text-center rounded hover:text-black hover:bg-gray-300 transition">
+          Danger Zones Management
         </Link>
       </div>
-      <h2 className="text-4xl font-bold mt-12 mb-6 text-gray-900 shadow-lg px-4 py-2 rounded bg-white bg-opacity-80">
+      <h2 className="text-4xl font-bold mt-36 mb-6 text-gray-900 shadow-lg px-4 py-2 rounded bg-white bg-opacity-80">
         Safe Zones Management
       </h2>
       <div className="w-2/5 bg-white rounded-lg shadow-lg mt-2">
@@ -174,6 +185,11 @@ const ViewAllSafeZones = () => {
         onClose={closeUpdateModal}
         zoneId={selectedZoneId}
         onSave={handleSave}
+      />
+      <DeleteConfirmationDialog
+        isOpen={isConfirmationModalOpen}
+        onClose={closeConfirmationModal}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

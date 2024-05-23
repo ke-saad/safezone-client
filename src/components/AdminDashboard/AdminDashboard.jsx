@@ -55,7 +55,7 @@ const AdminDashboard = () => {
   };
 
   const handleManageDangerZones = () => {
-    navigate("/dangerzonesmanagingpage");
+    navigate("/viewalldangerzones");
   };
 
   const handleManageActivityLogs = () => {
@@ -73,7 +73,7 @@ const AdminDashboard = () => {
   return (
     <div className="relative flex flex-col items-center justify-center w-full h-full p-5 text-gray-800">
       <div
-        className="absolute top-0 left-0 w-full h-full bg-cover bg-center "
+        className="fixed top-0 left-0 w-full h-full bg-cover bg-center "
         style={{ backgroundImage: "url('/Map.png')" }}
       ></div>
       <div className="navbar flex justify-between w-full p-4 bg-black shadow-md">

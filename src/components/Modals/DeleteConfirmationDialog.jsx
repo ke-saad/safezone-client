@@ -9,7 +9,7 @@ const DeleteConfirmationDialog = ({ isOpen, onClose, onConfirm }) => {
       <div className="absolute inset-0 bg-gray-900 opacity-50"></div>
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg mx-auto z-10">
         <h2 className="text-xl font-semibold mb-4 text-red-600">Confirm Deletion</h2>
-        <p className="mb-4">Are you sure you want to delete this user?</p>
+        <p className="mb-4">Are you sure you want to delete this entity?</p>
         <div className="flex justify-end space-x-4">
           <button
             onClick={onClose}

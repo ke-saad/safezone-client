@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
 import axios from "axios";
-import { FaCheck, FaTimes, FaTrashAlt, FaEye, FaMapMarkedAlt, FaPlus } from "react-icons/fa";
+import { FaTimes, FaMapMarkerAlt, FaTrashAlt, FaMap, FaPlus, FaEdit } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
-const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
-  const [safeZone, setSafeZone] = useState(null);
+const ViewUpdateDangerZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
+  const [dangerZone, setDangerZone] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [message, setMessage] = useState("");
   const [showAddMarkerDialog, setShowAddMarkerDialog] = useState(false);
@@ -12,37 +13,39 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
   const [locationName, setLocationName] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [description, setDescription] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSafeZone = async () => {
+    const fetchDangerZone = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/safezones/${zoneId}`);
+        const response = await axios.get(`http://localhost:3001/dangerzones/${zoneId}`);
         const zone = response.data;
-        setSafeZone(zone);
+        setDangerZone(zone);
         setMarkers(zone.markers || []);
       } catch (error) {
-        setMessage("Failed to fetch safe zone details.");
+        setMessage("Failed to fetch danger zone details.");
         console.error("Error:", error);
       }
     };
 
-    if (zoneId && isOpen) {
-      fetchSafeZone();
+    if (zoneId) {
+      fetchDangerZone();
     }
-  }, [zoneId, isOpen]);
+  }, [zoneId]);
 
-  const updateSafeZone = async (e) => {
+  const updateDangerZone = async (e) => {
     e.preventDefault();
 
     try {
-      await axios.put(`http://localhost:3001/safezones/${zoneId}`, { markers });
-      setMessage("Safe zone updated successfully.");
+      await axios.put(`http://localhost:3001/dangerzones/${zoneId}`, { markers });
+      setMessage("Danger zone updated successfully.");
       setTimeout(() => {
-        onSave();
         onClose();
+        onSave();
       }, 1500);
     } catch (error) {
-      setMessage("Failed to update safe zone.");
+      setMessage("Failed to update danger zone.");
       console.error("Error:", error);
     }
   };
@@ -83,6 +86,7 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
       const region_id = context.find(c => c.id.startsWith('region'))?.id || '';
       const country_name = context.find(c => c.id.startsWith('country'))?.text || '';
       const short_code = context.find(c => c.id.startsWith('country'))?.short_code || '';
+
       setMarkers([...markers, {
         coordinates: [lng, lat],
         place_name: placeName,
@@ -90,7 +94,8 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
         timestamp: new Date().toISOString(),
         region_id,
         country_name,
-        short_code
+        short_code,
+        description // Add description here
       }]);
       setMessage("Marker added successfully.");
       setTimeout(() => setMessage(""), 1500);
@@ -99,6 +104,10 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
       setTimeout(() => setMessage(""), 1500);
     } finally {
       setShowAddMarkerDialog(false);
+      setLocationName("");
+      setLatitude("");
+      setLongitude("");
+      setDescription(""); // Clear the description field
     }
   };
 
@@ -107,10 +116,13 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50 pt-32">
       <div className="w-full max-w-4xl bg-white bg-opacity-90 rounded-lg shadow-lg p-6 relative">
-        <h2 className="text-4xl font-bold mb-6 text-gray-900 text-center"> Safe Zone Informations</h2>
+        <button onClick={onClose} className="absolute top-2 right-2 text-red-500">
+          <FaTimes size={20} />
+        </button>
+        <h2 className="text-4xl font-bold mb-6 text-gray-900 text-center">Danger Zone Informations</h2>
         {message && <div className="text-center mb-4 text-green-500">{message}</div>}
-        {safeZone ? (
-          <form onSubmit={updateSafeZone}>
+        {dangerZone ? (
+          <form onSubmit={updateDangerZone}>
             <div className="mb-4">
               <h3 className="text-xl font-bold mb-3 text-center">Markers:</h3>
               <div className="max-h-64 overflow-y-auto border border-gray-300 rounded shadow-sm mb-4">
@@ -118,6 +130,7 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
                   <thead>
                     <tr>
                       <th className="border border-gray-300 p-2 bg-gray-200">Location</th>
+                      <th className="border border-gray-300 p-2 bg-gray-200">Description</th>
                       <th className="border border-gray-300 p-2 bg-gray-200">Actions</th>
                     </tr>
                   </thead>
@@ -125,13 +138,14 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
                     {markers.map((marker, index) => (
                       <tr key={index}>
                         <td className="border border-gray-300 p-2">{marker.place_name || "Unknown location"}</td>
+                        <td className="border border-gray-300 p-2">{marker.description}</td>
                         <td className="border border-gray-300 p-2 flex space-x-2 justify-center">
                           <button
                             type="button"
                             className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition transform hover:scale-105 flex items-center"
-                            onClick={() => window.open(`/marker/${marker.coordinates[1]},${marker.coordinates[0]}`, '_blank')}
+                            onClick={() => navigate(`/marker/${marker.coordinates[1]},${marker.coordinates[0]}`)}
                           >
-                            <FaEye className="mr-2" /> View
+                            <FaMapMarkerAlt className="mr-2" /> View
                           </button>
                           <button
                             type="button"
@@ -159,14 +173,14 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
                 type="submit"
                 className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 transition transform hover:scale-105 flex items-center"
               >
-                <FaCheck className="mr-2" /> Update Safe Zone
+                <FaEdit className="mr-2" /> Update Danger Zone
               </button>
               <button
                 type="button"
                 className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition transform hover:scale-105 flex items-center"
-                onClick={() => window.open(`/map?zoneType=safe&id=${zoneId}`, '_blank')}
+                onClick={() => navigate(`/map?zoneType=danger&id=${zoneId}`, '_blank')}
               >
-                <FaMapMarkedAlt className="mr-2" /> View on Map
+                <FaMap className="mr-2" /> View on Map
               </button>
             </div>
           </form>
@@ -239,6 +253,15 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
                 </div>
               </>
             )}
+            <div className="input-item mb-4">
+              <label className="block mb-1">Description:</label>
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
             <div className="flex justify-between">
               <button
                 type="button"
@@ -262,11 +285,11 @@ const ViewUpdateSafeZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
   );
 };
 
-ViewUpdateSafeZoneModal.propTypes = {
+ViewUpdateDangerZoneModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   zoneId: PropTypes.string.isRequired,
   onSave: PropTypes.func.isRequired,
 };
 
-export default ViewUpdateSafeZoneModal;
+export default ViewUpdateDangerZoneModal;
