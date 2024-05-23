@@ -117,19 +117,19 @@ const MapPage = () => {
   const zoneType = queryParams.get("zoneType");
   const zoneId = queryParams.get("id");
 
-  // Function to add marker to the database
+  // Add marker to the database function
   const addMarkerToDatabase = async (marker, zoneType) => {
     const endpoint = zoneType === "danger"
       ? "http://localhost:3001/dangermarkers/add"
       : "http://localhost:3001/safetymarkers/add";
-
+  
     // Perform forward geocoding to get full information about the marker's location
     const geocodeResponse = await axios.get("http://localhost:3001/mapbox/forward", {
       params: { q: `${marker.position[1]},${marker.position[0]}`, limit: 1 },
     });
-
+  
     const geocodeData = geocodeResponse.data.features[0] || {};
-
+  
     const payload = {
       coordinates: marker.position,
       description: marker.description || "",
@@ -138,11 +138,16 @@ const MapPage = () => {
       context: geocodeData.context || [], // Store the context array from the geocode response
       ...(zoneType === "danger" && { exception: marker.exception || "" }), // Include exception attribute for danger markers
     };
-
+  
     console.log("Sending payload:", JSON.stringify(payload, null, 2)); // Log the payload
-
+  
     try {
-      const response = await axios.post(endpoint, payload);
+      const token = localStorage.getItem("token");
+      const response = await axios.post(endpoint, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data; // return the newly created marker data
     } catch (error) {
       console.error(`Error adding ${zoneType} marker to the database:`, error);
@@ -150,72 +155,71 @@ const MapPage = () => {
     }
   };
 
+
   // Function to update GeoJSON layers and store zone data with forward geocoding for markers
   const updateGeoJsonLayer = async (markers, setLayerFunc, zoneType) => {
     if (markers.length >= 10 && markers.length % 10 === 0) {
-      // Extract the last 10 markers
       const lastTenMarkers = markers.slice(-10);
-
-      // Calculate the convex hull (if needed)
+  
       const points = lastTenMarkers.map((marker) =>
         turf.point([marker.position[1], marker.position[0]])
       );
       const featureCollection = turf.featureCollection(points);
       const hull = turf.convex(featureCollection);
-
-      // Perform forward geocoding for each marker to get full information
+  
       const updatedMarkers = await Promise.all(
         lastTenMarkers.map(async (marker) => {
           const geocodeResponse = await axios.get("http://localhost:3001/mapbox/forward", {
             params: { q: `${marker.position[1]},${marker.position[0]}`, limit: 1 },
           });
-
+  
           const geocodeData = geocodeResponse.data.features[0] || {};
           return {
             ...marker,
             place_name: geocodeData.place_name || "Unknown location",
-            context: geocodeData.context || [], // Store the context array from the geocode response
+            context: geocodeData.context || [],
           };
         })
       );
-
-      // Determine endpoint
-      const endpoint =
-        zoneType === "danger"
-          ? "http://localhost:3001/dangerzones/add"
-          : "http://localhost:3001/safezones/add";
-
-      // Format payload according to the zone type
+  
+      const endpoint = zoneType === "danger"
+        ? "http://localhost:3001/dangerzones/add"
+        : "http://localhost:3001/safezones/add";
+  
       const payload = {
-        markers: updatedMarkers.map((marker) => ({
+        markers: updatedMarkers.map(marker => ({
           coordinates: marker.position,
-          description: marker.description || "",
+          description: marker.description,
           timestamp: marker.timestamp,
           place_name: marker.place_name,
           context: marker.context,
-          ...(zoneType === "danger" && { exception: marker.exception || "" }), // Include exception attribute for danger markers
+          ...(zoneType === "danger" && { exception: marker.exception || "" }),
         })),
       };
-
-      // Make the Axios POST request
+  
       try {
-        const response = await axios.post(endpoint, payload);
+        const token = localStorage.getItem("token");
+        const response = await axios.post(endpoint, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
         const createdZone = response.data.data.zone;
-
+  
         if (hull && createdZone._id) {
-          hull.properties = { zoneType, zoneId: createdZone._id }; // Add properties to the GeoJSON feature
-          setLayerFunc((layers) => [...layers, hull]);
-          setCompletedZones((prev) => [...prev, createdZone._id]); // Mark the zone as completed
+          hull.properties = { zoneType, zoneId: createdZone._id };
+          setLayerFunc(layers => [...layers, hull]);
+          setCompletedZones(prev => [...prev, createdZone._id]);
         } else {
           console.error("Hull or created zone ID is missing.");
         }
-
-        console.log(`${zoneType} zones added to the database:`, response.data);
       } catch (error) {
         console.error(`Error adding ${zoneType} zones to the database:`, error);
       }
     }
   };
+  
 
   // Function to fetch a specific zone from the server
   const fetchZoneById = async (zoneType, id) => {
@@ -461,16 +465,22 @@ const MapPage = () => {
     setDeleteButtonClicked(false);
   };
 
+  
+
   // Function to delete all markers in a zone
   const handleZoneDelete = async (zoneId, zoneType) => {
     try {
-      const endpoint =
-        zoneType === "safe"
-          ? `http://localhost:3001/safezones/${zoneId}`
-          : `http://localhost:3001/dangerzones/${zoneId}`;
+      const token = localStorage.getItem("token");
+      const endpoint = zoneType === "safe"
+        ? `http://localhost:3001/safezones/${zoneId}`
+        : `http://localhost:3001/dangerzones/${zoneId}`;
   
       // Send DELETE request to the appropriate endpoint
-      const response = await axios.delete(endpoint);
+      const response = await axios.delete(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
   
       if (response.data.success) {
         // Remove the zone from completed zones
