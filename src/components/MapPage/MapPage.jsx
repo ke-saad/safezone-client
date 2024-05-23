@@ -1,3 +1,4 @@
+//MapPage.jsx:
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -68,7 +69,6 @@ const PopupContent = ({ title, description, position, onDelete }) => {
 const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
   <div className="confirmation-dialog">
     <p>{message}</p>
-    <button onClick={() => onConfirm("view")}>View</button>
     <button onClick={() => onConfirm("delete")}>Delete</button>
     <button onClick={onCancel}>Cancel</button>
   </div>
@@ -461,6 +461,7 @@ const MapPage = () => {
       setDangerousMarkers(updatedMarkers);
     } else if (type === "itinerary") {
       setItineraryMarkers([]);
+      setItineraryMarkers([]);
     }
     setDeleteButtonClicked(false);
   };
@@ -591,6 +592,7 @@ const MapPage = () => {
 
         // Check if map is defined before using setView
         if (map) map.setView([latitudeResult, longitudeResult], 13);
+        // Check if map is defined before using setView
       } catch (error) {
         console.error("Error fetching location name:", error);
       }
@@ -872,15 +874,10 @@ const showLayerConfirmationDialog = () => {
           )}
           <button onClick={performSearch}>Search</button>
         </div>
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/admindashboard" className="nav-link">
-          Dashboard
-        </Link>
-        <Link to="/login" className="nav-link">
-          Log Out
-        </Link>
+        <Link to="/admindashboard" className="text-white text-center w-1/2 py-2 px-4 rounded hover:text-black hover:bg-gray-300 transition">
+            Dashboard
+          </Link>
+      
       </div>
       <div className="map-area">
         <MapContainer
@@ -976,6 +973,7 @@ const showLayerConfirmationDialog = () => {
           {routeCoordinates.length > 0 && (
             <Polyline positions={routeCoordinates} color="#2A629A" />
           )}
+          {/* Render the calculated route */}
           {/* Render yellow marker for search results */}
           {yellowMarkerPosition && (
             <Marker

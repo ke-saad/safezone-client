@@ -7,9 +7,8 @@ function NotFound() {
     <div className="not-found-container">
       {/* Navbar */}
       <div className="navbar">
-        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/admindashboard" className="nav-link">Dasboard</Link>
         <Link to="/login" className="nav-link">Login</Link>
-        <Link to="/aboutus" className="nav-link">About Us</Link>
       </div>
       {/* End Navbar */}
       <div className="center-content">
