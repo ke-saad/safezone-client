@@ -32,9 +32,6 @@ const ViewMarkerDetails = () => {
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white font-sans" style={{ backgroundImage: "url('/Map.png')" }}>
       <div className="navbar flex justify-between w-full p-4 bg-black shadow-md">
-  <Link to="/login" className="text-white py-2 px-4 w-1/2 text-center rounded hover:text-black hover:bg-gray-300 transition">
-    Logout
-  </Link>
   <Link to="/admindashboard" className="text-white py-2 px-4 w-1/2 text-center rounded hover:text-black hover:bg-gray-300 transition">
     Dashboard
   </Link>

@@ -863,15 +863,10 @@ const showLayerConfirmationDialog = () => {
           )}
           <button onClick={performSearch}>Search</button>
         </div>
-        <Link to="/" className="nav-link">
-          Home
-        </Link>
-        <Link to="/admindashboard" className="nav-link">
-          Dashboard
-        </Link>
-        <Link to="/login" className="nav-link">
-          Log Out
-        </Link>
+        <Link to="/admindashboard" className="text-white text-center w-1/2 py-2 px-4 rounded hover:text-black hover:bg-gray-300 transition">
+            Dashboard
+          </Link>
+      
       </div>
       <div className="map-area">
         <MapContainer

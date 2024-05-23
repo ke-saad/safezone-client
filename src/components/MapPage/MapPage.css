@@ -12,13 +12,14 @@ body {
   width: 100%;
 }
 
+
 /* Navbar Styles */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0; /* Ensure the navbar goes all the way to the right */
-  background-color: #378CE7; /* Changed color */
+  background-color: black; /* Changed color */
   display: flex;
   justify-content: space-between;
   align-items: center;
