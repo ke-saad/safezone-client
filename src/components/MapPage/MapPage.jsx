@@ -69,7 +69,6 @@ const PopupContent = ({ title, description, position, onDelete }) => {
 const ConfirmationDialog = ({ message, onConfirm, onCancel }) => (
   <div className="confirmation-dialog">
     <p>{message}</p>
-    <button onClick={() => onConfirm("view")}>View</button>
     <button onClick={() => onConfirm("delete")}>Delete</button>
     <button onClick={onCancel}>Cancel</button>
   </div>

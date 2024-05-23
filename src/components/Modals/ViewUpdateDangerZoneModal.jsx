@@ -29,10 +29,10 @@ const ViewUpdateDangerZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
       }
     };
 
-    if (zoneId) {
+    if (zoneId && isOpen) {
       fetchDangerZone();
     }
-  }, [zoneId]);
+  }, [zoneId, isOpen]);
 
   const updateDangerZone = async (e) => {
     e.preventDefault();
