@@ -1,7 +1,5 @@
-// src/App.jsx
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import './tailwind.css'; // ou './tailwind.css' selon votre configuration
+import './tailwind.css'; 
 import Signup from './components/Signup/Signup';
 import Login from './components/Login/Login';
 import NotFound from './components/NotFound/NotFound';
@@ -17,6 +15,8 @@ import ViewMarkerDetails from './components/ViewMarkerDetails/ViewMarkerDetails'
 import ActivityLogs from './components/ActivityLogs/ActivityLogs';
 import UserActivityLog from './components/UserActivityLog/UserActivityLog';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import AlertsPage from './components/AlertsPage/AlertsPage';
+import SingleAlertPage from './components/SingleAlertPage/SingleAlertPage';
 
 function App() {
   return (
@@ -24,6 +24,7 @@ function App() {
       <Routes>
         <Route path='/register' element={<ProtectedRoute><Signup /></ProtectedRoute>} />
         <Route path='/login' element={<Login />} />
+        <Route path='/' element={<Login />} />
         <Route path='/map' element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
         <Route path='*' element={<Navigate to='/not-found' />} />
         <Route path='/not-found' element={<NotFound />} />
@@ -48,6 +49,22 @@ function App() {
           element={
             <ProtectedRoute>
               <ViewAllUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/alertspage'
+          element={
+            <ProtectedRoute>
+              <AlertsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/alert/:id'
+          element={
+            <ProtectedRoute>
+              <SingleAlertPage />
             </ProtectedRoute>
           }
         />

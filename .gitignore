@@ -1,27 +1,71 @@
+# Dependencies
+node_modules/
+
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Testing
+coverage/
+*.lcov
+
+# Babel, ESLint, and other configurations
+*.babelrc
+.babelrc.js
+*.eslintrc.cjs
+.eslintrc.js
+.eslintcache
+
+# Miscellaneous
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.pem
+*.crt
+*.key
 
-# Node modules
-node_modules
+# Vite
+dist/
+.vite/
+
+# Webpack
+dist/
+.cache/
+
+# PostCSS
+postcss.config.cjs
+
+# Tailwind CSS
+tailwind.config.cjs
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build directories
+build/
+out/
+temp/
+
+# Static site generators
+.next/
+.nuxt/
+.sapper/
+
+# Miscellaneous
+*.DS_Store
+*.tmp
+*.temp

@@ -881,8 +881,8 @@ const showLayerConfirmationDialog = () => {
       </div>
       <div className="map-area">
         <MapContainer
-          center={[31.54764361241541, -8.756375278549186]}
-          zoom={8}
+          center={[31.638479, -8.009901]}
+          zoom={13}
           style={{ height: "100%", width: "100%" }}
           zoomControl={false}
           whenCreated={setMap}

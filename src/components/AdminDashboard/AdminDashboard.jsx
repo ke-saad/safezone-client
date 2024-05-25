@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate,} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import userIcon from "../Images/userIcon.png";
 import securityIcon from "../Images/securityIcon.png";
@@ -48,7 +48,6 @@ const AdminDashboard = () => {
   const handleManageUsers = () => {
     navigate("/viewAllusers");
   };
-  
 
   const handleManageSecurityZones = () => {
     navigate("/viewAllsafezones");
@@ -63,7 +62,7 @@ const AdminDashboard = () => {
   };
 
   const handleManageAlerts = () => {
-    navigate("/admin/alerts");
+    navigate("/alertspage");
   };
 
   const handleViewMap = () => {
@@ -77,17 +76,17 @@ const AdminDashboard = () => {
         style={{ backgroundImage: "url('/Map.png')" }}
       ></div>
       <div className="navbar flex justify-between w-full p-4 bg-black shadow-md">
-  <span
-    className="text-white py-2 px-4  rounded hover:text-black hover:bg-gray-300 transition cursor-pointer flex-1 text-center"
-    onClick={handleLogout}
-  >
-    Logout
-  </span>
-</div>
+        <span
+          className="text-white py-2 px-4  rounded hover:text-black hover:bg-gray-300 transition cursor-pointer flex-1 text-center"
+          onClick={handleLogout}
+        >
+          Logout
+        </span>
+      </div>
 
       {isAdmin && (
         <div className="flex flex-col items-center justify-center w-full p-5">
-          <h1  className="mb-8 text-4xl font-bold  text-white shadow-lg px-4 py-2 rounded">
+          <h1 className="mb-8 text-4xl font-bold  text-white shadow-lg px-4 py-2 rounded">
             Admin Dashboard
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -95,7 +94,7 @@ const AdminDashboard = () => {
               className="w-64 h-64 p-5 bg-white bg-opacity-80 rounded-lg cursor-pointer flex flex-col items-center shadow-lg transition-transform transform hover:bg-opacity-100 hover:scale-105"
               onClick={handleManageUsers}
             >
-              <img src={userIcon} alt="Manage Users" className="w-24 h-24 mb-3" />
+              <img src={userIcon} alt="Manage Users" className="w-24              h-24 mb-3" />
               <p className="text-lg text-center text-gray-800">Manage Users</p>
             </div>
             <div
@@ -141,3 +140,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

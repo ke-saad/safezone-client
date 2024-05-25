@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import './SingleAlertPage.css';
 
 const SingleAlertPage = () => {
   const { alertId } = useParams();
@@ -59,18 +58,19 @@ const SingleAlertPage = () => {
   };
 
   return (
-    <div className="single-alert-page-container">
-      <div className="navbar">
-        <Link to="/" className="nav-link">Home</Link>
-        <Link to="/admindashboard" className="nav-link">Dashboard</Link>
-        <Link to="/aboutus" className="nav-link">About Us</Link>
-      </div>
-      <div className="background-overlay"></div>
-      <div className="content">
-        <h2 className="title">Alert Details</h2>
-        {message && <div className="message">{message}</div>}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-3xl p-6 bg-white shadow-md rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold">Alert Details</h2>
+          <div className="space-x-4">
+            <Link to="/" className="text-blue-500 hover:underline">Home</Link>
+            <Link to="/admindashboard" className="text-blue-500 hover:underline">Dashboard</Link>
+            <Link to="/aboutus" className="text-blue-500 hover:underline">About Us</Link>
+          </div>
+        </div>
+        {message && <div className="mb-4 text-red-500">{message}</div>}
         {alert ? (
-          <div className="alert-details">
+          <div className="mb-4">
             <p><strong>ID:</strong> {alert._id}</p>
             <p><strong>Type:</strong> {alert.type}</p>
             <p><strong>Message:</strong> {alert.message}</p>
@@ -79,27 +79,27 @@ const SingleAlertPage = () => {
           <p>Loading alert details...</p>
         )}
         {pendingZone ? (
-          <div className="pending-zone-details">
-            <h3>Pending {alert.zoneType === 'danger' ? 'Danger' : 'Safe'} Zone Details:</h3>
-            <table className="markers-table">
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Pending {alert.zoneType === 'danger' ? 'Danger' : 'Safe'} Zone Details:</h3>
+            <table className="w-full mb-4 table-auto border-collapse">
               <thead>
-                <tr>
-                  <th>Location</th>
-                  <th>Coordinates</th>
+                <tr className="bg-gray-200">
+                  <th className="border px-4 py-2">Location</th>
+                  <th className="border px-4 py-2">Coordinates</th>
                 </tr>
               </thead>
               <tbody>
                 {pendingZone.markers.map((marker, index) => (
                   <tr key={index}>
-                    <td>{marker.place_name || 'Unknown location'}</td>
-                    <td>{marker.coordinates.join(', ')}</td>
+                    <td className="border px-4 py-2">{marker.place_name || 'Unknown location'}</td>
+                    <td className="border px-4 py-2">{marker.coordinates.join(', ')}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <div className="button-group">
-              <button className="approve-button" onClick={() => handleApproval('approve')}>Approve</button>
-              <button className="disapprove-button" onClick={() => handleApproval('disapprove')}>Disapprove</button>
+            <div className="flex justify-end space-x-4">
+              <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700" onClick={() => handleApproval('approve')}>Approve</button>
+              <button className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700" onClick={() => handleApproval('disapprove')}>Disapprove</button>
             </div>
           </div>
         ) : (
