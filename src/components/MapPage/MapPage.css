@@ -1,10 +1,11 @@
+/* Reset the margin and padding for all elements to ensure consistency */
 * {
   margin: 0;
   padding: 0;
-  
+  box-sizing: border-box; /* Border and padding are included in the element's dimensions */
 }
 
-
+/* Full-height layout */
 html,
 body {
   height: 100%;
@@ -12,23 +13,23 @@ body {
 }
 
 
-
+/* Navbar Styles */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
-  
-  
+  right: 0; /* Ensure the navbar goes all the way to the right */
+  background-color: black; /* Changed color */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  
-  
+  padding: 0 20px; /* Add some horizontal padding */
+  z-index: 1000; /* High z-index to ensure it's on top */
   height: 45px;
 }
 
 .nav-link {
-  
+  color: white; /* Changed color */
   text-decoration: none;
   padding: 10px;
 }
@@ -55,60 +56,60 @@ body {
   cursor: pointer;
 }
 
-
+/* Main container for the sidebar and map */
 .map-container {
   display: flex;
   position: absolute;
-  
+  top: 45px; /* Height of the navbar */
   bottom: 0;
   left: 0;
   right: 0;
   overflow: hidden;
 }
 
-
+/* Sidebar Styles */
 .sidebar {
   width: 200px;
   background-color: #f4f4f4;
   padding: 20px;
   height: 100%;
-  
+  overflow-y: auto; /* Scroll bar if needed */
 }
 
-
+/* Adjust the map to fill the remaining width */
 .map-area {
   flex-grow: 1;
   height: 100%;
 }
 
-
+/* Message box styles */
 .message {
   color: #333;
   font-size: 14px;
 }
 
-
+/* Control buttons styles */
 .control-buttons {
   position: absolute;
-  
-  
+  right: 10px; /* Change position to right */
+  top: 80px; /* Adjusted top positioning below the zoom control */
   display: flex;
-  
-  
-  
-  
+  flex-direction: column; /* Stack buttons vertically */
+  justify-content: space-between; /* Add spacing between buttons */
+  width: auto; /* Remove fixed width */
+  height: fit-content; /* Allow buttons to adjust to their content */
   z-index: 1000;
 }
 
 .control-button {
-  
+  background-color: #ffffff; /* Match navbar color */
   border: 1px solid #ddd;
-  
+  padding: 5px; /* Reduce button padding for smaller size */
   border-radius: 5px;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease-in-out;
-  
+  margin-bottom: 10px; /* Add space between icons */
 }
 
 .control-button:hover {
@@ -116,11 +117,11 @@ body {
 }
 
 .control-button img {
-  
+  width: 22px; /* Reduce icon size */
   height: 22px;
 }
 
-
+/* Popup styling */
 .leaflet-popup-content-wrapper {
   background-color: #ffffff;
   border-radius: 5px;
@@ -161,7 +162,7 @@ body {
   margin: 5px;
   padding: 5px 10px;
   border: none;
-  
+  background-color: #378CE7; /* Changed color */
   color: white;
   border-radius: 3px;
   cursor: pointer;
@@ -171,7 +172,7 @@ body {
   background-color: #0056b3;
 }
 
-
+/* MapPage.css */
 .view-button {
   color: black;
   text-decoration: none;
