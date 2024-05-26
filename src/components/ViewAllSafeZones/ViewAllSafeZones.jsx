@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { FaPlus, FaTrashAlt, FaInfoCircle } from 'react-icons/fa';
-import AddSafeZoneModal from "../Modals/AddSafeZoneModal";  // Assurez-vous que ce chemin est correct
-import ViewUpdateSafeZoneModal from "../Modals/ViewUpdateSafeZoneModal";  // Assurez-vous que ce chemin est correct
-import DeleteConfirmationDialog from "../Modals/DeleteConfirmationDialog";  // Assurez-vous que ce chemin est correct
+import AddSafeZoneModal from "../Modals/AddSafeZoneModal";  
+import ViewUpdateSafeZoneModal from "../Modals/ViewUpdateSafeZoneModal";  
+import DeleteConfirmationDialog from "../Modals/DeleteConfirmationDialog";  
 
 const ViewAllSafeZones = () => {
   const [safeZones, setSafeZones] = useState([]);
@@ -77,7 +77,7 @@ const ViewAllSafeZones = () => {
   const handleSave = () => {
     setIsAddModalOpen(false);
     setIsUpdateModalOpen(false);
-    // Refresh the list of safe zones
+   
     axios.get("http://localhost:3001/safezones").then(response => {
       setSafeZones(response.data);
       setFilteredSafeZones(response.data);

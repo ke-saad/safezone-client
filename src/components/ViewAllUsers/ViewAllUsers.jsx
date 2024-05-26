@@ -23,7 +23,7 @@ const ViewAllUsers = () => {
         const response = await axios.get("http://localhost:3001/users");
         const sortedUsers = response.data.sort((a, b) =>
           a.username.localeCompare(b.username)
-        ); // Sort users alphabetically by username
+        ); 
         setUsers(sortedUsers);
         setFilteredUsers(sortedUsers);
       } catch (error) {

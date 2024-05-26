@@ -33,7 +33,6 @@ const LocationInfoPage = () => {
       <h1>Location Information</h1>
       <p><strong>Place Name:</strong> {locationInfo.place_name}</p>
       <p><strong>Coordinates:</strong> ({lat}, {lng})</p>
-      {/* Add more location details as needed */}
     </div>
   );
 };

@@ -71,7 +71,7 @@ const AddSafeZoneModal = ({ isOpen, onClose, onSave }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50 pt-32"> {/* Remplace mt-16 par pt-16 */}
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50 pt-32">
       <div className="w-full max-w-xl bg-white bg-opacity-90 rounded-lg shadow-lg p-6">
         <h2 className="text-4xl font-bold mb-6 text-gray-900 text-center">Add Safe Zone</h2>
         <form onSubmit={handleSubmit}>
@@ -103,7 +103,7 @@ const AddSafeZoneModal = ({ isOpen, onClose, onSave }) => {
           </div>
         </form>
         {message && <div className="text-center mt-4 text-green-500">{message}</div>}
-        <div className="mt-6 max-h-32 overflow-y-auto"> {/* max-h-24 pour limiter la hauteur à 6rem */}
+        <div className="mt-6 max-h-32 overflow-y-auto"> 
           <h3 className="text-center font-bold text-gray-700 mb-4">Markers ({markers.length}/10)</h3>
           <ul className="list-none p-0">
             {markers.map((marker, index) => (

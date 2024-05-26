@@ -45,11 +45,11 @@ const UserInformation = () => {
 
       const updatedUser = {
         ...(newUsername && { username: newUsername }),
-        ...(newPassword && { newPassword }), // Send newPassword if provided
+        ...(newPassword && { newPassword }), 
         ...(isAdmin !== user.isAdmin && { isAdmin }),
       };
 
-      const token = localStorage.getItem('token'); // Retrieve the token
+      const token = localStorage.getItem('token'); 
       const response = await axios.put(`http://localhost:3001/users/${user._id}`, updatedUser, {
         headers: {
           Authorization: `Bearer ${token}`,

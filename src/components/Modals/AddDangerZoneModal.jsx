@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { FaTimes, FaPlus, FaTrashAlt, FaSave } from 'react-icons/fa';
 import PropTypes from "prop-types";
-import ErrorModal from '../Modals/ErrorModal';  // Assurez-vous que le chemin est correct
-import SuccessDialog from '../Modals/SuccessDialog';  // Assurez-vous que le chemin est correct
+import ErrorModal from '../Modals/ErrorModal';  
+import SuccessDialog from '../Modals/SuccessDialog';  
 
 const AddDangerZoneModal = ({ isOpen, onClose, onSave }) => {
   const [latitude, setLatitude] = useState("");
@@ -77,7 +77,7 @@ const AddDangerZoneModal = ({ isOpen, onClose, onSave }) => {
       setSuccessMessage("Danger zone added successfully.");
       setMarkers([]);
       setIsSuccessOpen(true);
-      onSave(); // Refresh the list of danger zones
+      onSave(); 
     } catch (error) {
       setErrorMessage("Failed to add danger zone.");
       setIsErrorOpen(true);

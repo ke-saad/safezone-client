@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { FaMapMarkerAlt, FaInfoCircle, FaGlobe } from "react-icons/fa";
 
 const ViewMarkerDetails = () => {
-  const { coordinates } = useParams(); // Get coordinates from URL
+  const { coordinates } = useParams(); 
   const [marker, setMarker] = useState(null);
   const [message, setMessage] = useState("");
 

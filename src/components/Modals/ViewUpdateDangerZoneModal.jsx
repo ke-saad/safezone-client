@@ -95,7 +95,7 @@ const ViewUpdateDangerZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
         region_id,
         country_name,
         short_code,
-        description // Add description here
+        description 
       }]);
       setMessage("Marker added successfully.");
       setTimeout(() => setMessage(""), 1500);
@@ -107,7 +107,7 @@ const ViewUpdateDangerZoneModal = ({ isOpen, onClose, zoneId, onSave }) => {
       setLocationName("");
       setLatitude("");
       setLongitude("");
-      setDescription(""); // Clear the description field
+      setDescription(""); 
     }
   };
 

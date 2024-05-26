@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaTrashAlt, FaInfoCircle, FaPlus } from 'react-icons/fa';
 import AddDangerZoneModal from "../Modals/AddDangerZoneModal";
 import ViewUpdateDangerZoneModal from "../Modals/ViewUpdateDangerZoneModal";
-import DeleteConfirmationDialog from "../Modals/DeleteConfirmationDialog"; // Assurez-vous que le chemin est correct
+import DeleteConfirmationDialog from "../Modals/DeleteConfirmationDialog";
 
 const ViewAllDangerZones = () => {
   const [dangerZones, setDangerZones] = useState([]);

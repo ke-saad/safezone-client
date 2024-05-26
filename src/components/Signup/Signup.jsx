@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { IoMdPerson, IoMdLock, IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { validatePassword } from "../utils/passwordValidator"; // Import the password validator
+import { validatePassword } from "../utils/passwordValidator"; 
 import { Input, Button, Typography, Card } from "@material-tailwind/react";
 import SuccessDialog from '../Modals/SuccessDialog';
 import ErrorModal from '../Modals/ErrorModal';
@@ -61,7 +61,7 @@ const Signup = () => {
         setIsSuccessModalOpen(true);
         setTimeout(() => {
           navigate('/viewallusers');
-        }, 3000); // Delay for showing the success message before redirecting
+        }, 3000); 
       }
     } catch (error) {
       if (!error.response) {

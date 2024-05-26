@@ -1,5 +1,3 @@
-// itineraryService.jsx
-
 import axios from 'axios';
 
 const calculateItinerary = async (start, end) => {

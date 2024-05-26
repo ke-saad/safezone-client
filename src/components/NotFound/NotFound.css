@@ -1,4 +1,3 @@
-/* General Reset for NotFound */
 .not-found-container body, .not-found-container html, .not-found-container #root {
   margin: 0;
   padding: 0;
@@ -7,7 +6,7 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Not Found Container */
+
 .not-found-container {
   display: flex;
   flex-direction: column;
@@ -20,7 +19,7 @@
   color: #2e3b4e;
 }
 
-/* Navbar */
+
 .not-found-container .navbar {
   display: flex;
   justify-content: flex-end;
@@ -44,7 +43,7 @@
   transform: scale(1.05);
 }
 
-/* Center Content */
+
 .not-found-container .center-content {
   text-align: center;
   background: rgba(255, 255, 255, 0.8);
